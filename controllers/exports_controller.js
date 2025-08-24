@@ -6,21 +6,24 @@ const ws = wb.addWorksheet('Clientes');
 const ExportClients = async (req, res) => {
   try {
     const [Clients] = await pool.query(
-      `SELECT id_cliente, cpf, nome_completo, data_nascimento, rg, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento 
+      `SELECT id_cliente, cpf, nome_completo, data_nascimento, rg, telefone, email, cep, 
+      rua, numero, nome_rede, senha_rede, plano, vencimento 
        FROM clientes`
     );
-//cabecalho da tabela
+
+    // cabecalho da tabela
     const headingColumnNames = [
       "id_cliente", "cpf", "nome_completo", "data_nascimento", "rg", "telefone",
       "email", "cep", "rua", "numero", "nome_rede", "senha_rede", "plano", "vencimento"
     ];
-//colocando o cabecalho
+
+    // colocando o cabecalho
     let headingColumnIndex = 1;
     headingColumnNames.forEach(heading => {
       ws.cell(1, headingColumnIndex++).string(heading);
     });
 
-//colocando os dados
+    // colocando os dados
     let rowIndex = 2;
     Clients.forEach(record => {
       let columnIndex = 1;
@@ -30,7 +33,8 @@ const ExportClients = async (req, res) => {
       });
       rowIndex++;
     });
-//forcando para fazer o download do arquivo
+
+    // forcando para fazer o download do arquivo
     res.setHeader(
       'Content-Type',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -39,7 +43,6 @@ const ExportClients = async (req, res) => {
       "Content-Disposition",
       "attachment; filename=Clients.xlsx"
     );
-
 
     wb.write('Clients.xlsx', res);
 
