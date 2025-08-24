@@ -15,6 +15,11 @@ async function GetPlan() {
     return [row];
 }
 
+async function GetPlanName(nome_plano) {
+    const [rows] = await db.query('SELECT * FROM planos WHERE nome_plano LIKE ', [`%${nome_plano}%`]);
+    return rows;
+}
+
 async function PLanAlter(id_cliente, nomeplano, descricao, velocidade, valor, status, atualizado_em) {
     const [rows] = await db.query(`
     UPDATE planos
@@ -38,5 +43,9 @@ async function delPlan(id_plano) {
 
 
 module.exports = {
-    
+    PlanInsert,
+    GetPlan,
+    PLanAlter,
+    delPlan,
+    GetPlanName
 }
