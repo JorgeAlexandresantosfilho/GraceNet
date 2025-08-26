@@ -1,5 +1,6 @@
 const plans_models = require('../models/plans_models');
 
+
 //controller para quando for criado um novo plano
 async function planInsert(req, res) {
     const {nomeplano, descricao, velocidade, valor, status, criado_em} = req.body; //trazendo os dados para gerenciar campos nulos
@@ -59,3 +60,6 @@ async function DeleteCustomer(req, res) {
         res.status(500).json({ Msg: "Erro espere um momento.", error: error.message });
     }
 }
+
+
+
