@@ -1,14 +1,14 @@
 const Clients_models = require('../models/Clients_models');
 
 async function CreateCustomer(req, res) {
-    const {cpf, nome_completo, data_nascimento, rg, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento} = req.body;
+    const {cpf, nome_completo, data_nascimento, rg, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, id_plano} = req.body;
 
-    if(!cpf || !nome_completo || !data_nascimento || !rg || !telefone || !email || !cep || !rua || !numero || !nome_rede || !senha_rede || !plano || !vencimento){
+    if(!cpf || !nome_completo || !data_nascimento || !rg || !telefone || !email || !cep || !rua || !numero || !nome_rede || !senha_rede || !plano || !vencimento || !id_plano){
         return res.status(400).json({ mensagem: 'Todos os campos são obrigatórios.' });
     }
 
     try {
-        const result = await Clients_models.InsertCustomer(cpf, nome_completo, data_nascimento, rg, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento);
+        const result = await Clients_models.InsertCustomer(cpf, nome_completo, data_nascimento, rg, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, id_plano);
         res.status(201).json({ mensagem: 'Cliente inserido com sucesso.', result });
     } catch (error) {
         res.status(500).json({ mensagem: 'Erro ao adicionar cliente.', erro: error.message });
@@ -37,10 +37,10 @@ async function SearchCustomerById(req, res){
 
 async function UpdateCustomer(req, res) {
     try {
-        const { id_cliente, nome_completo, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status } = req.body;
+        const { id_cliente, nome_completo, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status, id_plano } = req.body;
 
         const result = await Clients_models.UpdtCustomer(
-            id_cliente, nome_completo, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status
+            id_cliente, nome_completo, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status, id_plano
         );
 
         res.status(200).json({ msg: "Cliente atualizado com sucesso!", result });

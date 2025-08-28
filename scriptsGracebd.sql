@@ -21,13 +21,25 @@ CREATE TABLE clientes (
     nome_rede VARCHAR(50) NOT NULL,
     senha_rede VARCHAR(100) NOT NULL,
     plano VARCHAR(50) NOT NULL,
-    vencimento ENUM('10','20','30') NOT NULL
+    vencimento ENUM('10','20','30') NOT NULL,
     status TINYINT(1) DEFAULT(1) NOT NULL
 );
 
+ALTER TABLE clientes ADD CONSTRAINT cliente_plano FOREIGN KEY (id_plano) REFERENCES planos(id_plano);
+
+SELECT * FROM clientes;
+
+ALTER TABLE clientes 
+ADD COLUMN id_plano INT NOT NULL;
+
+ALTER TABLE clientes
+DROP FOREIGN KEY cliente_plano;
+
+ALTER TABLE clientes
+DROP COLUMN id_plano;
 
 CREATE TABLE planos (
-  idplano INT AUTO_INCREMENT PRIMARY KEY,
+  id_plano INT AUTO_INCREMENT PRIMARY KEY,
   nomeplano VARCHAR(100) NOT NULL,
   descricao TEXT,
   velocidade VARCHAR(50) NOT NULL,
@@ -37,7 +49,8 @@ CREATE TABLE planos (
   criado_em DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-
+ALTER TABLE planos
+CHANGE COLUMN idplano id_plano INT AUTO_INCREMENT;
 DELIMITER $$
 
 -- inserir cliente
