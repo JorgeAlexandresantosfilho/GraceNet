@@ -37,10 +37,10 @@ async function SearchCustomerById(req, res){
 
 async function UpdateCustomer(req, res) {
     try {
-        const { id_cliente, nome_completo, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento } = req.body;
+        const { id_cliente, nome_completo, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status } = req.body;
 
         const result = await Clients_models.UpdtCustomer(
-            id_cliente, nome_completo, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento
+            id_cliente, nome_completo, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status
         );
 
         res.status(200).json({ msg: "Cliente atualizado com sucesso!", result });

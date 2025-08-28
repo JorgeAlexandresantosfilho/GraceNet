@@ -18,10 +18,10 @@ async function GetCustomerById(id) {
     return rows[0];
 }
 
-async function UpdtCustomer(id_cliente, nome_completo, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento) {
+async function UpdtCustomer(id_cliente, nome_completo, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status) {
     const [rows] = await db.query(
-        'CALL sp_cliente_atualizar(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [id_cliente, nome_completo, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento]
+        'CALL sp_cliente_atualizar(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [id_cliente, nome_completo, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status]
     );
     return rows[0];
 }
