@@ -2,14 +2,14 @@ const db = require('../config/db');
 
 async function PlanInsert(nomeplano, descricao, velocidade, valor, status) {
     const [result] = await db.query(
-        'INSERT INTO planos (nome_plano, descricao, velocidade, valor, status) VALUES (?,?,?,?,?);',
+        'INSERT INTO planos (nomeplano, descricao, velocidade, valor, status) VALUES (?,?,?,?,?);',
         [nomeplano, descricao, velocidade, valor, status]
     );
     return result;
 }
 
 async function GetPlan() {
-    [rows] = await db.query(
+   const [rows] = await db.query(
         'SELECT * FROM planos'
     );
     return rows;
@@ -28,7 +28,7 @@ async function PLanAlter(nomeplano, descricao, velocidade, valor, status, id_pla
         descricao = ?,
         velocidade = ?,
         valor = ?,
-        status = ?,
+        status = ?
     WHERE 
         id_plano = ?; `,
     [nomeplano, descricao, velocidade, valor, status, id_plano]);

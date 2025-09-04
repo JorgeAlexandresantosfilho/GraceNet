@@ -11,7 +11,7 @@ async function planInsert(req, res) {
         const ctrl_result = await plans_models.PlanInsert(nomeplano, descricao, velocidade, valor, status);
         return res.status(200).json({ Msg: 'Plano inserido para mais detalhes consulte-o na tela de planos.', ctrl_result });
     } catch (error) {
-        return res.status(500).json({Msg: 'Erro ao criar o plano, tente novamente.', error: error.Msg });
+        return res.status(500).json({Msg: 'Erro ao criar o plano, tente novamente.', error: error.message });
     }
 }
 
@@ -20,7 +20,7 @@ async function getAllPlan(req, res) {
         const plans = await plans_models.GetPlan();
         return res.status(200).json(plans);
     } catch (error) {
-        return res.status(500).json({ Msg: 'Erro ao procurar o plano', error: error.Msg });
+        return res.status(500).json({ Msg: 'Erro ao procurar o plano', error: error.message });
     }
 }
 
@@ -31,21 +31,21 @@ async function GetPlanName(req, res) {
         const plan = await plans_models.GetPlanName(name_plan);
         return res.status(200).json({ plan })
     } catch (error) {
-        return res.status(500).json({ Msg: 'Erro ao achar o plano', error: error.Msg });
+        return res.status(500).json({ Msg: 'Erro ao achar o plano', error: error.message });
     }
 }
 
 
 async function UpdtPlan(req, res){
         try {
-            const {id_plano, nomeplano, descricao, velocidade, valor, status, atualizado_em} = req.body;
+            const {nomeplano, descricao, velocidade, valor, status, id_plano} = req.body;
 
             const result = await plans_models.PLanAlter(
-                 id_plano, nomeplano, descricao, velocidade, valor, status, atualizado_em);
+                 nomeplano, descricao, velocidade, valor, status, id_plano);
 
                 res.status(200).json({ msg: "Plano atualizado com sucesso!", result });
         } catch (error) {
-            return res.status(500).json({ Msg: 'Erro ao ataulizar o plano.', error: error.Msg });
+            return res.status(500).json({ Msg: 'Erro ao ataulizar o plano.', error: error.message });
         }
 }
 
@@ -53,8 +53,8 @@ async function UpdtPlan(req, res){
 async function DeletePlan(req, res) {
     const id_plano = req.params.id_plano;
     try {
-        const result = await plans_models.delPlan(id_plan);
-        res.status(200).json({ Msg: "Plano deletado.", result});
+        const result = await plans_models.delPlan(id_plano);
+        res.status(200).json({ Msg: "Plano deletado.", result });
     } catch (error) {
         res.status(500).json({ Msg: "Erro espere um momento.", error: error.message });
     }
