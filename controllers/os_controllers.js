@@ -11,9 +11,9 @@ async function OsAdd(req, res) {
 }
 
 async function GetOS(req, res) {
-    const os_id = req.params.os_id;
+    const codigo_os = req.params.codigo_os;
     try {
-        const os = await os_models.GetOS(os_id);
+        const os = await os_models.GetOS(codigo_os);
         if (os.length === 0) {
             return res.status(404).json({ Msg: 'Nota não encontrada' });
         }
@@ -23,8 +23,17 @@ async function GetOS(req, res) {
     }
 }
 
+async function GetAllOS(req, res) {
+    try {
+        const os = await os_models.GetAllOS();
+        return res.status(200).json(os);
+    } catch (error) {
+        return res.status(500).json({ Msg: 'Erro ao procurar pelas notas', error: error.message });
+    }
+}
 
 module.exports = {
     OsAdd,
-    GetOS
+    GetOS,
+    GetAllOS
 }

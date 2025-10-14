@@ -9,5 +9,5 @@ console.log('DB_DATABASE:', process.env.DB_DATABASE);
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-    console.log(`Running on Port: ${PORT}`)
+    console.log(`Server running on Port: ${PORT}`)
 });

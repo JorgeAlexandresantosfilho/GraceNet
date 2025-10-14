@@ -1,11 +1,13 @@
 CREATE DATABASE IF NOT EXISTS GraceNet;
 USE GraceNet;
-
+INSERT INTO tecnicos (nome, matricula, equipe, status)
+VALUES ('João Silva', 'TEC001', 'Equipe A', 'Ativo');
 -- apagar tabela antiga se existir
 DROP TABLE IF EXISTS clientes;
 SHOW CREATE PROCEDURE sp_cliente_inserir;
 SELECT * FROM clientes;
-SELECT * FROM planos;
+SELECT * FROM tecnicos;
+SELECT * FROM suportes;
 -- criar tabela principal de clientes
 CREATE TABLE clientes (
     id_cliente INT AUTO_INCREMENT PRIMARY KEY,
@@ -24,6 +26,24 @@ CREATE TABLE clientes (
     vencimento ENUM('10','20','30') NOT NULL,
     status TINYINT(1) DEFAULT(1) NOT NULL
 );
+
+USE GraceNet;
+ALTER TABLE suportes ADD COLUMN codigo_os VARCHAR(20) UNIQUE;
+
+DELIMITER //
+CREATE TRIGGER gerar_codigo_os
+BEFORE INSERT ON suportes
+FOR EACH ROW
+BEGIN
+    DECLARE novo_codigo VARCHAR(20);
+    SET novo_codigo = CONCAT('#os', LPAD(FLOOR(RAND() * 900000 + 100000), 6, '0'));
+    SET NEW.codigo_os = novo_codigo;
+END;
+//
+DELIMITER ;
+
+SELECT * FROM suportes;
+
 
 ALTER TABLE clientes ADD CONSTRAINT cliente_plano FOREIGN KEY (id_plano) REFERENCES planos(id_plano);
 
@@ -83,17 +103,6 @@ CREATE TABLE usuarios(
     data_modificacao TIMESTAMP,
     ultimo_login TIMESTAMP,
     FOREIGN KEY (perfil_id) REFERENCES perfis_acesso(perfil_id)
-) ENGINE=InnoDB;
-
-CREATE TABLE interacoes_os(
-	interacao_id INT AUTO_INCREMENT PRIMARY KEY,
-    os_id INT,
-    usuario_id INT,
-    descricao TEXT NOT NULL,
-    data_interacao DATETIME DEFAULT CURRENT_TIMESTAMP,
-    tipo_interacao ENUM('Comentário Interno', 'Contato com Cliente', 'Atualização de Status', 'Solução Aplicada') NOT NULL,
-    FOREIGN KEY (os_id) REFERENCES suportes(os_id),
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(usuario_id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE perfis_acesso(
