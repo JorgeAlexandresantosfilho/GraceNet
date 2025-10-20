@@ -75,6 +75,69 @@ CREATE TABLE tecnicos(
     equipe VARCHAR(100) NOT NULL,
     status ENUM('Ativo', 'Férias', 'Inativo') NOT NULL
 );
+USE GraceNet;
+
+CREATE TABLE equipamentos(
+id_equipamento BIGINT PRIMARY KEY,
+tipo VARCHAR(50) NOT NULL,
+modelo VARCHAR(50) NOT NULL,
+fabricante VARCHAR(100),
+numero_serie VARCHAR(100) UNIQUE,
+mac_adress VARCHAR(17),
+ip_gerenciado VARCHAR(45),
+firmware VARCHAR(50),
+status ENUM('Ativo', 'Manutenção', 'Defeituoso', 'Sucata', 'Disponível', 'Desativado') DEFAULT 'Disponível',
+localizacao VARCHAR(100) NOT NULL,
+data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+DROP PROCEDURE sp_inserir_equipamento;
+
+CREATE TABLE pop(
+id_torre INT AUTO_INCREMENT PRIMARY KEY,
+localizacao VARCHAR(255) NOT NULL,
+ip_gerenciamento VARCHAR(45) NOT NULL
+);
+
+CREATE TABLE equipamento_vinculo (
+    id_vinculo INT AUTO_INCREMENT PRIMARY KEY,
+    id_equipamento BIGINT,
+    tipo_vinculo ENUM('cliente', 'torre', 'estoque') NOT NULL,
+    id_cliente INT,
+    id_torre INT, 
+    data_inicio DATETIME DEFAULT CURRENT_TIMESTAMP,
+    data_fim DATETIME,
+    observacao VARCHAR(255),
+    FOREIGN KEY (id_equipamento) REFERENCES equipamentos(id_equipamento),
+    FOREIGN KEY (id_torre) REFERENCES pop(id_torre)
+);
+
+CREATE TABLE movimentacoes_equipamento (
+    id_mov INT AUTO_INCREMENT PRIMARY KEY,
+    id_equipamento BIGINT NOT NULL,
+    acao ENUM('instalacao', 'remocao', 'manutencao', 'transferencia') NOT NULL,
+    id_tecnico INT NOT NULL,
+    usuario_id INT NOT NULL,
+    data_acao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    descricao TEXT,
+    FOREIGN KEY (id_equipamento) REFERENCES equipamentos(id_equipamento),
+    FOREIGN KEY (id_tecnico) REFERENCES tecnicos(id_tecnico),
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(usuario_id)
+);
+
+
+SELECT * FROM equipamentos;
+
+ALTER TABLE equipamentos ADD FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente);
+
+ALTER TABLE equipamentos ADD id_cliente INT;
+
+DROP TABLE interacoes_os;
+
+SELECT * FROM tecnicos;
+
+INSERT INTO tecnicos(nome, matricula, equipe, status) VALUES ("bvg-005", "09876543", "005-BVG", "Ativo");
+
 CREATE TABLE suportes(
    os_id INT AUTO_INCREMENT PRIMARY KEY,
    titulo VARCHAR(255) NOT NULL,
@@ -104,11 +167,22 @@ CREATE TABLE usuarios(
     ultimo_login TIMESTAMP,
     FOREIGN KEY (perfil_id) REFERENCES perfis_acesso(perfil_id)
 ) ENGINE=InnoDB;
+ALTER TABLE suportes ADD COLUMN data_interacao DATETIME DEFAULT CURRENT_TIMESTAMP;
 
 CREATE TABLE perfis_acesso(
 	perfil_id INT AUTO_INCREMENT PRIMARY KEY,
     nome_perfil VARCHAR(100) UNIQUE,
     descricao TEXT 
+);
+
+CREATE TABLE log (
+    id_log INT AUTO_INCREMENT PRIMARY KEY,
+    tabela_afetada VARCHAR(100) NOT NULL,
+    id_registro_afetado BIGINT,
+    tipo_acao ENUM('INSERÇÃO', 'ATUALIZAÇÃO', 'EXCLUSÃO') NOT NULL,
+    descricao_acao TEXT,
+    usuario_responsavel VARCHAR(100),
+    data_acao DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- inserir cliente
@@ -147,7 +221,7 @@ BEGIN
     SELECT * FROM clientes WHERE id_cliente = LAST_INSERT_ID();
 END $$
 DELIMITER ;
-
+DELIMITER $$
 -- atualizar cliente
 CREATE PROCEDURE sp_cliente_atualizar (
     IN p_id_cliente INT,
@@ -193,3 +267,241 @@ BEGIN
 END $$
 
 DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE sp_inserir_equipamento (
+    IN p_id_equipamento BIGINT,
+    IN p_tipo VARCHAR(50),
+    IN p_modelo VARCHAR(100),
+    IN p_fabricante VARCHAR(100),
+    IN p_numero_serie VARCHAR(100),
+    IN p_localizacao VARCHAR(100),
+    IN p_status VARCHAR(30),
+    IN p_observacoes TEXT
+)
+BEGIN
+    INSERT INTO equipamentos (
+        id_equipamento, tipo, modelo, fabricante, numero_serie,
+        localizacao, status, observacoes
+    )
+    VALUES (
+        p_idequipamento, p_tipo, p_modelo, p_fabricante, p_numero_serie,
+        p_localizacao, p_status, p_observacoes
+    );
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE sp_editar_equipamento (
+    IN p_id_equipamento BIGINT,
+    IN p_tipo VARCHAR(50),
+    IN p_modelo VARCHAR(100),
+    IN p_fabricante VARCHAR(100),
+    IN p_numero_serie VARCHAR(100),
+    IN p_localizacao VARCHAR(100),
+    IN p_status VARCHAR(30),
+    IN p_observacoes TEXT
+)
+BEGIN
+    UPDATE equipamentos
+    SET tipo = p_tipo,
+        modelo = p_modelo,
+        fabricante = p_fabricante,
+        numero_serie = p_numero_serie,
+        localizacao = p_localizacao,
+        status = p_status,
+        observacoes = p_observacoes
+    WHERE id_equipamento = p_id_equipamento;
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE sp_excluir_equipamento (
+    IN p_id_equipamento BIGINT
+)
+BEGIN
+    DELETE FROM equipamentos WHERE id_equipamento = p_id_equipamento;
+END //
+DELIMITER ;
+
+-- TRIGGERS PARA ALIMENTAR A TABELA DE LOGS (EQUIPAMENTOS)
+
+
+DELIMITER //
+CREATE TRIGGER trg_equipamento_insert
+AFTER INSERT ON equipamentos
+FOR EACH ROW
+BEGIN
+    INSERT INTO log (
+        tabela_afetada,
+        id_registro_afetado,
+        tipo_acao,
+        descricao_acao,
+        usuario_responsavel
+    ) VALUES (
+        'equipamentos',
+        NEW.id_equipamento,
+        'INSERÇÃO',
+        CONCAT('Novo equipamento cadastrado: ', NEW.modelo, ' | Nº Série: ', NEW.numero_serie, ' | Localização: ', NEW.localizacao),
+        CURRENT_USER()
+    );
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE TRIGGER trg_equipamento_update
+AFTER UPDATE ON equipamentos
+FOR EACH ROW
+BEGIN
+    INSERT INTO log (
+        tabela_afetada,
+        id_registro_afetado,
+        tipo_acao,
+        descricao_acao,
+        usuario_responsavel
+    ) VALUES (
+        'equipamentos',
+        NEW.id_equipamento,
+        'ATUALIZAÇÃO',
+        CONCAT('Equipamento atualizado. Modelo: ', OLD.modelo, ' → ', NEW.modelo, ' | Status: ', OLD.status, ' → ', NEW.status),
+        CURRENT_USER()
+    );
+END //
+DELIMITER ;
+
+-- TRIGGERS PARA LOGS (CLIENTES)
+
+DELIMITER //
+CREATE TRIGGER trg_cliente_insert
+AFTER INSERT ON clientes
+FOR EACH ROW
+BEGIN
+    INSERT INTO log (
+        tabela_afetada,
+        id_registro_afetado,
+        tipo_acao,
+        descricao_acao,
+        usuario_responsavel
+    ) VALUES (
+        'clientes',
+        NEW.id_cliente,
+        'INSERÇÃO',
+        CONCAT('Novo cliente cadastrado: ', NEW.nome_completo, ' | CPF: ', NEW.cpf),
+        CURRENT_USER()
+    );
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER trg_cliente_update
+AFTER UPDATE ON clientes
+FOR EACH ROW
+BEGIN
+    INSERT INTO log (
+        tabela_afetada,
+        id_registro_afetado,
+        tipo_acao,
+        descricao_acao,
+        usuario_responsavel
+    ) VALUES (
+        'clientes',
+        NEW.id_cliente,
+        'ATUALIZAÇÃO',
+        CONCAT('Cliente atualizado: ', OLD.nome_completo, ' → ', NEW.nome_completo, ' | Status: ', OLD.status, ' → ', NEW.status),
+        CURRENT_USER()
+    );
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER trg_cliente_delete
+AFTER DELETE ON clientes
+FOR EACH ROW
+BEGIN
+    INSERT INTO log (
+        tabela_afetada,
+        id_registro_afetado,
+        tipo_acao,
+        descricao_acao,
+        usuario_responsavel
+    ) VALUES (
+        'clientes',
+        OLD.id_cliente,
+        'EXCLUSÃO',
+        CONCAT('Cliente removido: ', OLD.nome_completo, ' | CPF: ', OLD.cpf),
+        CURRENT_USER()
+    );
+END //
+DELIMITER ;
+
+-- TRIGGERS PARA LOGS (SUPORTE)
+
+DELIMITER //
+CREATE TRIGGER trg_suporte_insert
+AFTER INSERT ON suportes
+FOR EACH ROW
+BEGIN
+    INSERT INTO log (
+        tabela_afetada,
+        id_registro_afetado,
+        tipo_acao,
+        descricao_acao,
+        usuario_responsavel
+    ) VALUES (
+        'suportes',
+        NEW.os_id,
+        'INSERÇÃO',
+        CONCAT('Nova OS criada: ', NEW.titulo, ' | Status: ', NEW.status),
+        CURRENT_USER()
+    );
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER trg_suporte_update
+AFTER UPDATE ON suportes
+FOR EACH ROW
+BEGIN
+    INSERT INTO log (
+        tabela_afetada,
+        id_registro_afetado,
+        tipo_acao,
+        descricao_acao,
+        usuario_responsavel
+    ) VALUES (
+        'suportes',
+        NEW.os_id,
+        'ATUALIZAÇÃO',
+        CONCAT('OS atualizada: ', OLD.status, ' → ', NEW.status),
+        CURRENT_USER()
+    );
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER trg_suporte_delete
+AFTER DELETE ON suportes
+FOR EACH ROW
+BEGIN
+    INSERT INTO log (
+        tabela_afetada,
+        id_registro_afetado,
+        tipo_acao,
+        descricao_acao,
+        usuario_responsavel
+    ) VALUES (
+        'suportes',
+        OLD.os_id,
+        'EXCLUSÃO',
+        CONCAT('OS removida: ', OLD.titulo, ' | Status final: ', OLD.status),
+        CURRENT_USER()
+    );
+END //
+DELIMITER ;
+
+SELECT * FROM log ORDER BY data_acao DESC;
+
+SHOW procedure status;
+

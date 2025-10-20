@@ -32,8 +32,20 @@ async function GetAllOS(req, res) {
     }
 }
 
+async function UpdateOS(req, res) {
+    const {os_id, titulo, descricao_problema, inicio_desejado, conclusao_desejada, status, prioridade, id_cliente, id_tecnico} = req.body;
+    try {
+        const os = await os_models.UpdateOS(os_id, titulo, descricao_problema, inicio_desejado, conclusao_desejada, status, prioridade, id_cliente, id_tecnico);
+        return res.status(200).json({ Msg: 'Nota atualizada', data: os[0] });
+    }
+    catch (error) {
+        return res.status(500).json({ Msg: 'Erro ao atualizar a nota', error: error.message });
+    }
+}
+
 module.exports = {
     OsAdd,
     GetOS,
-    GetAllOS
+    GetAllOS,
+    UpdateOS
 }
