@@ -1,3 +1,4 @@
+const db = require('../config/db');
 async function InsertEquipMov(id_equipamento, acao, id_tecnico, usuario_id, data_acao, descricao) {
     const [result] = await db.query(
         'INSERT INTO equipmov (id_equipamento, acao, id_tecnico, usuario_id, data_acao, descricao) VALUES (?, ?, ?, ?, ?, ?)',
