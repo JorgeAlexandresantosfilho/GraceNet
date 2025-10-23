@@ -222,42 +222,8 @@ BEGIN
 END $$
 DELIMITER ;
 DELIMITER $$
--- atualizar cliente
-CREATE PROCEDURE sp_cliente_atualizar (
-    IN p_id_cliente INT,
-    IN p_nome_completo VARCHAR(255),
-    IN p_telefone VARCHAR(20),
-    IN p_email VARCHAR(255),
-    IN p_cep VARCHAR(9),
-    IN p_rua VARCHAR(100),
-    IN p_numero VARCHAR(10),
-    IN p_nome_rede VARCHAR(50),
-    IN p_senha_rede VARCHAR(100),
-    IN p_plano VARCHAR(50),
-    IN p_vencimento VARCHAR(2),
-    IN status TINYINT(1),
-	IN p_id_plano INT 
-)
-BEGIN
-    UPDATE clientes
-    SET 
-        nome_completo = p_nome_completo,
-        telefone = p_telefone,
-        email = p_email,
-        cep = p_cep,
-        rua = p_rua,
-        numero = p_numero,
-        nome_rede = p_nome_rede,
-        senha_rede = p_senha_rede,
-        plano = p_plano,
-        vencimento = p_vencimento,
-        status = p_status, 
-        id_plano = p_id_plano
-    WHERE id_cliente = p_id_cliente;
 
-    SELECT * FROM clientes WHERE id_cliente = p_id_cliente;
-END $$
-
+DELIMITER //
 -- deletar cliente
 CREATE PROCEDURE sp_cliente_deletar (
     IN p_id_cliente INT

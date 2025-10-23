@@ -19,11 +19,15 @@ async function GetCustomerById(id) {
 }
 
 async function UpdtCustomer(id_cliente, nome_completo, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status, id_plano) {
-    const [rows] = await db.query(
-        'CALL sp_cliente_inserir(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [id_cliente, nome_completo, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status, id_plano]
-    );
-    return rows[0];
+    const sql = `
+        UPDATE clientes
+        SET nome_completo = ?, telefone = ?, email = ?, cep = ?, rua = ?, numero = ?,
+            nome_rede = ?, senha_rede = ?, plano = ?, vencimento = ?, status = ?, id_plano = ?
+        WHERE id_cliente = ?;
+    `;
+    const values = [nome_completo, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status, id_plano, id_cliente];
+    const [rows] = await db.query(sql, values);
+    return rows;
 }
 
 async function DeleteCustomer(id) {

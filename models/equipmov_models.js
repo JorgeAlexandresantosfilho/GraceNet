@@ -1,7 +1,7 @@
 const db = require('../config/db');
 async function InsertEquipMov(id_equipamento, acao, id_tecnico, usuario_id, data_acao, descricao) {
     const [result] = await db.query(
-        'INSERT INTO equipmov (id_equipamento, acao, id_tecnico, usuario_id, data_acao, descricao) VALUES (?, ?, ?, ?, ?, ?)',
+        'INSERT INTO movimentacoes_equipamento (id_equipamento, acao, id_tecnico, usuario_id, data_acao, descricao) VALUES (?, ?, ?, ?, ?, ?)',
         [id_equipamento, acao, id_tecnico, usuario_id, data_acao, descricao]
     );
     return result;
@@ -9,14 +9,14 @@ async function InsertEquipMov(id_equipamento, acao, id_tecnico, usuario_id, data
 
 async function GetAllEquipMov() {
     const [result] = await db.query(
-        'SELECT * FROM equipmov'
+        'SELECT * FROM movimentacoes_equipamento'
     );
     return result;
 }
 
 async function GetEquipMovById(id) {
     const [result] = await db.query(
-        'SELECT * FROM equipmov WHERE id = ?',
+        'SELECT * FROM movimentacoes_equipamento WHERE id = ?',
         [id]
     );
     return result;
@@ -24,7 +24,7 @@ async function GetEquipMovById(id) {
 
 async function UpdateEquipMov(id, id_equipamento, acao, id_tecnico, usuario_id, data_acao, descricao) {
     const [result] = await db.query(
-        'UPDATE equipmov SET id_equipamento = ?, acao = ?, id_tecnico = ?, usuario_id = ?, data_acao = ?, descricao = ? WHERE id = ?',
+        'UPDATE movimentacoes_equipamento SET id_equipamento = ?, acao = ?, id_tecnico = ?, usuario_id = ?, data_acao = ?, descricao = ? WHERE id = ?',
         [id_equipamento, acao, id_tecnico, usuario_id, data_acao, descricao, id]
     );
     return result;
@@ -32,7 +32,7 @@ async function UpdateEquipMov(id, id_equipamento, acao, id_tecnico, usuario_id, 
 
 async function DeleteEquipMov(id) {
     const [result] = await db.query(
-        'DELETE FROM equipmov WHERE id = ?',
+        'DELETE FROM movimentacoes_equipamento WHERE id = ?',
         [id]
     );
     return result;

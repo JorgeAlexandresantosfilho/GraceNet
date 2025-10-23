@@ -1,5 +1,7 @@
+const equip_models = require('../models/equip_models');
+
 async function InsertEquip(req, res) {
-    const {tipo, modelo, fabricante, numero_serie, mac_adress, ip_gerenciado, firmware, status, localizacao} = req.body;
+    const { tipo, modelo, fabricante, numero_serie, mac_adress, ip_gerenciado, firmware, status, localizacao } = req.body;
     try {
         const result = await equip_models.InsertEquip(tipo, modelo, fabricante, numero_serie, mac_adress, ip_gerenciado, firmware, status, localizacao);
         return res.status(200).json({ msg: 'Equipamento inserido com sucesso.', result });
@@ -18,8 +20,10 @@ async function GetAllEquip(req, res) {
 }
 
 async function GetEquipBySerial(req, res) {
-    const numero_serie = req.params.numero_serie;    try {
+    const numero_serie = req.params.numero_serie;
+    try {
         const result = await equip_models.GetEquipBySerial(numero_serie);
+        if (!result) return res.status(404).json({ msg: 'Equipamento não encontrado.' });
         return res.status(200).json({ msg: 'Equipamento encontrado.', result });
     } catch (error) {
         return res.status(500).json({ msg: 'Erro ao buscar equipamento.', error: error.message });
@@ -27,9 +31,10 @@ async function GetEquipBySerial(req, res) {
 }
 
 async function UpdateEquip(req, res) {
-    const {numero_serie, tipo, modelo, fabricante, mac_adress, ip_gerenciado, firmware, status, localizacao} = req.body;
+    const numero_serie = req.params.numero_serie;
+    const { tipo, modelo, fabricante, mac_adress, ip_gerenciado, firmware, status, localizacao } = req.body;
     try {
-        const result = await equip_models.UpdateEquip(numero_serie, tipo, modelo, fabricante, mac_adress, ip_gerenciado, firmware, status, localizacao);                
+        const result = await equip_models.UpdateEquip(numero_serie, tipo, modelo, fabricante, mac_adress, ip_gerenciado, firmware, status, localizacao);
         return res.status(200).json({ msg: 'Equipamento atualizado com sucesso.', result });
     } catch (error) {
         return res.status(500).json({ msg: 'Erro ao atualizar equipamento.', error: error.message });
@@ -42,7 +47,7 @@ async function DeleteEquip(req, res) {
         const result = await equip_models.DeleteEquip(numero_serie);
         return res.status(200).json({ msg: 'Equipamento deletado com sucesso.', result });
     } catch (error) {
-        return res.status(500).json({ msg: 'Erro ao deletar equipamento.', error: error.message });     
+        return res.status(500).json({ msg: 'Erro ao deletar equipamento.', error: error.message });
     }
 }
 
@@ -52,4 +57,4 @@ module.exports = {
     GetEquipBySerial,
     UpdateEquip,
     DeleteEquip
-}
+};
