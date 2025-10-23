@@ -1,13 +1,6 @@
 CREATE DATABASE IF NOT EXISTS GraceNet;
 USE GraceNet;
-INSERT INTO tecnicos (nome, matricula, equipe, status)
-VALUES ('João Silva', 'TEC001', 'Equipe A', 'Ativo');
--- apagar tabela antiga se existir
-DROP TABLE IF EXISTS clientes;
-SHOW CREATE PROCEDURE sp_cliente_inserir;
-SELECT * FROM clientes;
-SELECT * FROM tecnicos;
-SELECT * FROM suportes;
+
 -- criar tabela principal de clientes
 CREATE TABLE clientes (
     id_cliente INT AUTO_INCREMENT PRIMARY KEY,
@@ -27,9 +20,8 @@ CREATE TABLE clientes (
     status TINYINT(1) DEFAULT(1) NOT NULL
 );
 
-USE GraceNet;
 ALTER TABLE suportes ADD COLUMN codigo_os VARCHAR(20) UNIQUE;
-
+-- trigger feita para gerar um codigo unico personalizado para ordem de servico
 DELIMITER //
 CREATE TRIGGER gerar_codigo_os
 BEFORE INSERT ON suportes
@@ -42,9 +34,7 @@ END;
 //
 DELIMITER ;
 
-SELECT * FROM suportes;
-
-
+-- modificacoes em tabelas
 ALTER TABLE clientes ADD CONSTRAINT cliente_plano FOREIGN KEY (id_plano) REFERENCES planos(id_plano);
 
 SELECT * FROM clientes;
@@ -57,6 +47,17 @@ DROP FOREIGN KEY cliente_plano;
 
 ALTER TABLE clientes
 DROP COLUMN id_plano;
+
+ALTER TABLE equipamentos ADD FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente);
+
+ALTER TABLE equipamentos ADD id_cliente INT;
+
+DROP TABLE interacoes_os;
+
+ALTER TABLE suportes ADD COLUMN data_interacao DATETIME DEFAULT CURRENT_TIMESTAMP;
+
+-- finaliza aqui 
+
 
 CREATE TABLE planos (
   id_plano INT AUTO_INCREMENT PRIMARY KEY,
@@ -75,10 +76,9 @@ CREATE TABLE tecnicos(
     equipe VARCHAR(100) NOT NULL,
     status ENUM('Ativo', 'Férias', 'Inativo') NOT NULL
 );
-USE GraceNet;
 
 CREATE TABLE equipamentos(
-id_equipamento BIGINT PRIMARY KEY,
+id_equipamento BIGINT PRIMARY KEY AUTO_INCREMENT,
 tipo VARCHAR(50) NOT NULL,
 modelo VARCHAR(50) NOT NULL,
 fabricante VARCHAR(100),
@@ -91,7 +91,6 @@ localizacao VARCHAR(100) NOT NULL,
 data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-DROP PROCEDURE sp_inserir_equipamento;
 
 CREATE TABLE pop(
 id_torre INT AUTO_INCREMENT PRIMARY KEY,
@@ -125,19 +124,6 @@ CREATE TABLE movimentacoes_equipamento (
     FOREIGN KEY (usuario_id) REFERENCES usuarios(usuario_id)
 );
 
-
-SELECT * FROM equipamentos;
-
-ALTER TABLE equipamentos ADD FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente);
-
-ALTER TABLE equipamentos ADD id_cliente INT;
-
-DROP TABLE interacoes_os;
-
-SELECT * FROM tecnicos;
-
-INSERT INTO tecnicos(nome, matricula, equipe, status) VALUES ("bvg-005", "09876543", "005-BVG", "Ativo");
-
 CREATE TABLE suportes(
    os_id INT AUTO_INCREMENT PRIMARY KEY,
    titulo VARCHAR(255) NOT NULL,
@@ -152,8 +138,7 @@ CREATE TABLE suportes(
    FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente),
    FOREIGN KEY (id_tecnico) REFERENCES tecnicos(id_tecnico)
 ) ENGINE=InnoDB;
-DROP TABLE suportes;
-DROP TABLE interacoes_os;
+
 CREATE TABLE usuarios(
 	usuario_id 	INT AUTO_INCREMENT PRIMARY KEY,
     matricula VARCHAR(11) NOT NULL,
@@ -167,7 +152,7 @@ CREATE TABLE usuarios(
     ultimo_login TIMESTAMP,
     FOREIGN KEY (perfil_id) REFERENCES perfis_acesso(perfil_id)
 ) ENGINE=InnoDB;
-ALTER TABLE suportes ADD COLUMN data_interacao DATETIME DEFAULT CURRENT_TIMESTAMP;
+
 
 CREATE TABLE perfis_acesso(
 	perfil_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -186,10 +171,8 @@ CREATE TABLE log (
 );
 
 -- inserir cliente
-DROP PROCEDURE IF EXISTS sp_cliente_inserir;
 DESCRIBE clientes;
 
-DROP PROCEDURE IF EXISTS sp_cliente_inserir;
 DELIMITER $$
 CREATE PROCEDURE sp_cliente_inserir (
     IN p_cpf VARCHAR(14),
