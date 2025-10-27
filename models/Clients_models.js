@@ -2,10 +2,10 @@ const db = require('../config/db');
 
 async function InsertCustomer(cpf, nome_completo, data_nascimento, rg, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status, id_plano) {
     const [result] = await db.execute(
-        'CALL sp_cliente_inserir(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO clientes (cpf, nome_completo, data_nascimento, rg, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status, id_plano) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
         [cpf, nome_completo, data_nascimento, rg, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status, id_plano]
     );
-    return result[0];
+    return result;
 }
 
 async function GetAllCustomer() {
@@ -31,10 +31,10 @@ async function UpdtCustomer(id_cliente, nome_completo, telefone, email, cep, rua
 }
 
 async function DeleteCustomer(id) {
-    const [result] = await db.query('CALL sp_cliente_deletar(?)', [id]);
-    return result[0];
+    const sql = "UPDATE clientes SET status = 0 WHERE id_cliente = ?"; 
+    const [result] = await db.query(sql, [id]);
+    return result; 
 }
-
 module.exports = {
     InsertCustomer,
     GetAllCustomer,

@@ -1,16 +1,36 @@
 const Clients_models = require('../models/Clients_models');
 
 async function CreateCustomer(req, res) {
-    const {cpf, nome_completo, data_nascimento, rg, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status, id_plano} = req.body;
+    
+    const {
+        cpf, nome_completo, data_nascimento, telefone, email, plano, vencimento, status 
+    } = req.body;
 
-    if(!cpf || !nome_completo || !data_nascimento || !rg || !telefone || !email || !cep || !rua || !numero || !nome_rede || !senha_rede || !plano || !vencimento || status === undefined || !id_plano){
-        return res.status(400).json({ mensagem: 'Todos os campos são obrigatórios.' });
+    const { 
+        rg = '', 
+        cep = '', 
+        rua = '', 
+        numero = '',
+        nome_rede = '', 
+        senha_rede = '', 
+        id_plano = null 
+    } = req.body;
+
+
+    if(!cpf || !nome_completo || !data_nascimento || !telefone || !email || !plano || !vencimento || status === undefined){
+        return res.status(400).json({ mensagem: 'Campos (cpf, nome_completo, data_nascimento, telefone, email, plano, vencimento, status) são obrigatórios.' });
     }
 
     try {
-        const result = await Clients_models.InsertCustomer(cpf, nome_completo, data_nascimento, rg, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status, id_plano);
+        const result = await Clients_models.InsertCustomer(
+            cpf, nome_completo, data_nascimento, rg, telefone, email, cep, rua, numero, 
+            nome_rede, senha_rede, 
+            plano, vencimento, status, 
+            id_plano
+        );
         res.status(201).json({ mensagem: 'Cliente inserido com sucesso.', result });
     } catch (error) {
+        console.error("ERRO AO CRIAR CLIENTE:", error);
         res.status(500).json({ mensagem: 'Erro ao adicionar cliente.', erro: error.message });
     }
 }
@@ -20,6 +40,7 @@ async function GetCustomers(req, res){
         const users = await Clients_models.GetAllCustomer();
         res.status(200).json(users);
     } catch (error) {
+        console.error("ERRO AO BUSCAR CLIENTES:", error);
         res.status(500).json({ Msg: 'Aconteceu um erro...', error: error.message});
     }
 }
@@ -31,23 +52,35 @@ async function SearchCustomerById(req, res){
         if (!user) return res.status(404).json({ Msg: "Cliente não encontrado." });
         res.status(200).json(user);
     } catch (error) {
+        console.error(`ERRO AO BUSCAR CLIENTE ID ${id}:`, error);
         res.status(500).json({ Msg: "Erro, aguarde um pouco...", error: error.message });
     }
 }
 
+
 async function UpdateCustomer(req, res) {
     try {
-        const { id_cliente, nome_completo, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status, id_plano } = req.body;
+        const { id } = req.params; 
+        
+    
+        const { 
+            nome_completo, telefone, email, cep = '', rua = '', numero = '', 
+            nome_rede = '', senha_rede = '', plano, vencimento, status, id_plano = null 
+        } = req.body;
 
         const result = await Clients_models.UpdtCustomer(
-            id_cliente, nome_completo, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status, id_plano
+            id, nome_completo, telefone, email, cep, rua, numero, 
+            nome_rede, senha_rede, 
+            plano, vencimento, status, id_plano
         );
-
         res.status(200).json({ msg: "Cliente atualizado com sucesso!", result });
     } catch (err) {
+        console.error(`ERRO AO ATUALIZAR CLIENTE ID ${req.params.id}:`, err);
         res.status(500).json({ msg: "Erro ao atualizar Cliente.", erro: err.message });
     }
 }
+
+
 
 async function DeleteCustomer(req, res) {
     const id = req.params.id;
@@ -55,6 +88,7 @@ async function DeleteCustomer(req, res) {
         const result = await Clients_models.DeleteCustomer(id);
         res.status(200).json({ Msg: "Cliente deletado.", result});
     } catch (error) {
+        console.error(`ERRO AO DELETAR CLIENTE ID ${id}:`, error); 
         res.status(500).json({ Msg: "Erro espere um momento...", error: error.message });
     }
 }
