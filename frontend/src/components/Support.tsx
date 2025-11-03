@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Plus,
   Search,
@@ -8,82 +8,157 @@ import {
   AlertCircle,
   Filter,
 } from "lucide-react";
-import { ticketsSuporte } from "../data/support";
+// Importa a função da API e o tipo
+import { getSuporteTickets } from "../services/api";
+import type { TicketSuporte } from "../types";
+// --- IMPORTA OS MODAIS ---
+import ModalAdicionarSuporte from './ModalAdicionarSuporte';
+import ModalEditarSuporte from './ModalEditarSuporte';
 
 const Support = () => {
+  // --- Estados da API ---
+  const [tickets, setTickets] = useState<TicketSuporte[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // --- Estados de Filtro ---
   const [busca, definirBusca] = useState("");
   const [filtroStatus, definirtStatusFiltro] = useState("todos");
   const [filtroPrioridade, definirPrioridadeFiltro] = useState("todos");
 
-  const estatisticas = [
-    {
-      rotulo: "Tickets Abertos",
-      valor: ticketsSuporte.filter((ticket) => ticket.status === "Aberto").length,
-    },
-    {
-      rotulo: "Em Andamento",
-      valor: ticketsSuporte.filter((ticket) => ticket.status === "Em andamento").length,
-    },
-    {
-      rotulo: "Resolvidos",
-      valor: ticketsSuporte.filter((ticket) => ticket.status === "Resolvido").length,
-    },
-    { rotulo: "Tempo Médio", valor: "2h 15min" },
-  ];
+  // --- Estados dos Modais ---
+  const [isModalAdicionarAberto, setIsModalAdicionarAberto] = useState(false);
+  const [isModalEditarAberto, setIsModalEditarAberto] = useState(false);
+  const [ticketSelecionadoId, setTicketSelecionadoId] = useState<number | null>(null);
 
+
+  // Hook para carregar os dados da API
+  useEffect(() => {
+    carregarTickets();
+  }, []);
+
+  const carregarTickets = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getSuporteTickets();
+      setTickets(data);
+    } catch (err: any) {
+      setError(err.message || "Falha ao carregar chamados.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // --- Funções de ajuda (cores, ícones) ---
   const pegarStatusIcone = (status: string) => {
     switch (status) {
-      case "Aberto":
-        return AlertCircle;
-      case "Em andamento":
-        return Clock;
-      case "Resolvido":
-        return CheckCircle;
-      default:
-        return MessageSquare;
+      case "Aberto": return AlertCircle;
+      case "Em andamento": return Clock;
+      case "Resolvido": return CheckCircle;
+      default: return MessageSquare;
     }
   };
 
   const pegarStatusCor = (status: string) => {
     switch (status) {
-      case "Aberto":
-        return "bg-red-100 text-red-800";
-      case "Em andamento":
-        return "bg-yellow-100 text-yellow-800";
-      case "Resolvido":
-        return "bg-green-100 text-green-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+      case "Aberto": return "bg-red-100 text-red-800";
+      case "Em andamento": return "bg-yellow-100 text-yellow-800";
+      case "Resolvido": return "bg-green-100 text-green-800";
+      default: return "bg-gray-100 text-gray-800";
     }
   };
 
   const pegarPrioridadeCor = (prioridade: string) => {
     switch (prioridade) {
-      case "Alta":
-        return "bg-red-100 text-red-800";
-      case "Média":
-        return "bg-yellow-100 text-yellow-800";
-      case "Baixa":
-        return "bg-green-100 text-green-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+      case "Alta": return "bg-red-100 text-red-800";
+      case "Média": return "bg-yellow-100 text-yellow-800";
+      case "Baixa": return "bg-green-100 text-green-800";
+      default: return "bg-gray-100 text-gray-800";
     }
   };
 
-  const ticketsFiltrados = ticketsSuporte.filter((ticket) => {
+  // --- Estatísticas (calculadas a partir dos dados da API) ---
+  const estatisticas = [
+    {
+      rotulo: "Tickets Abertos",
+      valor: tickets.filter((ticket) => ticket.status === "Aberto").length,
+    },
+    {
+      rotulo: "Em Andamento",
+      valor: tickets.filter((ticket) => ticket.status === "Em andamento").length,
+    },
+    {
+      rotulo: "Resolvidos",
+      valor: tickets.filter((ticket) => ticket.status === "Resolvido").length,
+    },
+    { rotulo: "Total", valor: tickets.length },
+  ];
+
+  // --- Filtragem (baseada nos dados da API) ---
+  const ticketsFiltrados = tickets.filter((ticket) => {
     const buscaEncontrada =
-      ticket.titulo.toLowerCase().includes(busca.toLowerCase()) ||
-      ticket.cliente.toLowerCase().includes(busca.toLowerCase()) ||
-      ticket.telefone.includes(busca);
+      (ticket.titulo || '').toLowerCase().includes(busca.toLowerCase()) ||
+      (ticket.cliente || '').toLowerCase().includes(busca.toLowerCase()) ||
+      (ticket.telefone || '').includes(busca) ||
+      (ticket.id.toString()).includes(busca);
+      
     const statusIgual =
       filtroStatus === "todos" || ticket.status === filtroStatus;
     const prioridadeIgual =
       filtroPrioridade === "todos" || ticket.prioridade === filtroPrioridade;
+      
     return buscaEncontrada && statusIgual && prioridadeIgual;
   });
 
+  // --- Funções de Ação (Modais) ---
+  const handleAbrirModalAdicionar = () => {
+    setIsModalAdicionarAberto(true);
+  };
+  const handleFecharModalAdicionar = () => {
+    setIsModalAdicionarAberto(false);
+  };
+  const handleSalvarAdicao = (novoTicket: TicketSuporte) => {
+    setTickets(ticketsAtuais => [novoTicket, ...ticketsAtuais]);
+    handleFecharModalAdicionar();
+  };
+  
+  const handleAbrirModalEditar = (id: number) => {
+    setTicketSelecionadoId(id);
+    setIsModalEditarAberto(true);
+  };
+  const handleFecharModalEditar = () => {
+    setIsModalEditarAberto(false);
+    setTicketSelecionadoId(null);
+  };
+  const handleSalvarEdicao = (ticketAtualizado: TicketSuporte) => {
+    setTickets(ticketsAtuais => 
+      ticketsAtuais.map(t => (t.id === ticketAtualizado.id ? ticketAtualizado : t))
+    );
+    handleFecharModalEditar();
+  };
+  
+  // O botão "Ver Detalhes" agora também abre o modal de edição
+  const handleVerDetalhes = (id: number) => {
+     handleAbrirModalEditar(id);
+  };
+
+  // --- Renderização ---
+  if (loading) {
+    return <div className="p-6 text-center">Carregando chamados...</div>;
+  }
+  
+  if (error && tickets.length === 0) {
+    return <div className="p-6 text-center text-red-500">{error}</div>;
+  }
+
   return (
     <div className="space-y-6">
+       {error && tickets.length > 0 && (
+         <div className="p-3 bg-red-100 text-red-700 rounded-lg">{error}</div>
+      )}
+
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
@@ -94,8 +169,9 @@ const Support = () => {
           </p>
         </div>
         <button
+          onClick={handleAbrirModalAdicionar} // <-- Conectado
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center 
-        space-x-2 transition-colors"
+          space-x-2 transition-colors"
         >
           <Plus className="w-4 h-4" />
           <span>Novo Chamado</span>
@@ -117,7 +193,7 @@ const Support = () => {
             <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Buscar"
+              placeholder="Buscar por ID, título, cliente ou telefone..."
               value={busca}
               onChange={(elemento) => definirBusca(elemento.target.value)}
               className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 
@@ -145,7 +221,7 @@ const Support = () => {
               onChange={(elemento) => definirPrioridadeFiltro(elemento.target.value)}
               className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
             >
-              <option value="all">Todas as Prioridades</option>
+              <option value="todos">Todas as Prioridades</option>
               <option value="Alta">Alta</option>
               <option value="Média">Média</option>
               <option value="Baixa">Baixa</option>
@@ -155,6 +231,12 @@ const Support = () => {
       </div>
 
       <div className="space-y-4">
+        {ticketsFiltrados.length === 0 && !loading && (
+           <div className="text-center py-10 text-gray-500">
+             Nenhum chamado encontrado{busca || filtroStatus !== 'todos' || filtroPrioridade !== 'todos' ? ' com os filtros aplicados' : ''}.
+           </div>
+        )}
+        
         {ticketsFiltrados.map((ticket) => {
           const StatusIcon = pegarStatusIcone(ticket.status);
           return (
@@ -166,14 +248,14 @@ const Support = () => {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">#{ticket.id} - {ticket.titulo}</h3>
-                    <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
+                    <div className="flex items-center flex-wrap gap-x-4 gap-y-1 mt-2 text-sm text-gray-600">
                       <span>Cliente: <strong>{ticket.cliente}</strong></span>
                       <span>Telefone: {ticket.telefone}</span>
                       <span>Plano: {ticket.plano}</span>
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
                   <span className={`px-2 py-1 text-xs font-medium rounded-full ${pegarPrioridadeCor(ticket.prioridade)}`}>
                     {ticket.prioridade}
                   </span>
@@ -191,20 +273,26 @@ const Support = () => {
                   <p className="text-gray-900">{ticket.categoria}</p>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-600">Criado em:</span>
+                  <span className="font-medium text-gray-600">Início Desejado (Criado):</span>
                   <p className="text-gray-900">{ticket.criado}</p>
                 </div>
               </div>
 
               <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200">
                 <span className="text-sm text-gray-500">
-                  Última atualização: {ticket.atualizado}
+                  Conclusão Desejada (Atualizado): {ticket.atualizado}
                 </span>
                 <div className="flex space-x-2">
-                  <button type="button" className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition-colors">
+                  <button 
+                    type="button" 
+                    onClick={() => handleVerDetalhes(ticket.id)} // <-- Conectado
+                    className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition-colors">
                     Ver Detalhes
                   </button>
-                  <button type="button" className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-sm rounded-lg transition-colors">
+                  <button 
+                    type="button" 
+                    onClick={() => handleAbrirModalEditar(ticket.id)} // <-- Conectado
+                    className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-sm rounded-lg transition-colors">
                     Atualizar
                   </button>
                 </div>
@@ -214,11 +302,21 @@ const Support = () => {
         })}
       </div>
 
-      {ticketsFiltrados.length === 0 && (
-        <div className="text-center py-8">
-          <p className="text-gray-500">Nenhum chamado encontrado com os filtros aplicados.</p>
-        </div>
+      {/* --- Renderização dos Modais --- */}
+      {isModalAdicionarAberto && (
+        <ModalAdicionarSuporte
+          onClose={handleFecharModalAdicionar}
+          onSave={handleSalvarAdicao}
+        />
       )}
+      {isModalEditarAberto && ticketSelecionadoId && (
+        <ModalEditarSuporte
+          ticketId={ticketSelecionadoId}
+          onClose={handleFecharModalEditar}
+          onSave={handleSalvarEdicao}
+        />
+      )}
+
     </div>
   );
 };

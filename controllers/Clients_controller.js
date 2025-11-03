@@ -20,6 +20,9 @@ async function CreateCustomer(req, res) {
     if(!cpf || !nome_completo || !data_nascimento || !telefone || !email || !plano || !vencimento || status === undefined){
         return res.status(400).json({ mensagem: 'Campos (cpf, nome_completo, data_nascimento, telefone, email, plano, vencimento, status) são obrigatórios.' });
     }
+    if(senha_rede && senha_rede < 8){
+        return res.status(400).json({ mensagem: 'Erro: A senha deve ter no mínimo 8 caracteres.' })
+    }
 
     try {
         const result = await Clients_models.InsertCustomer(
@@ -46,7 +49,7 @@ async function GetCustomers(req, res){
 }
 
 async function SearchCustomerById(req, res){
-    const id = req.params.id;
+    const id = req.params.id;//espera o resultado, pede o id ao banco 
     try {
         const user = await Clients_models.GetCustomerById(id);
         if (!user) return res.status(404).json({ Msg: "Cliente não encontrado." });

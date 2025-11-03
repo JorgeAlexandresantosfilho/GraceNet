@@ -5,28 +5,40 @@ async function addOS(titulo, descricao_problema, inicio_desejado, conclusao_dese
         'INSERT INTO suportes (titulo, descricao_problema, inicio_desejado, conclusao_desejada, status, prioridade, id_cliente, id_tecnico) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
         [titulo, descricao_problema, inicio_desejado, conclusao_desejada, status, prioridade, id_cliente, id_tecnico]
     );
+
     return result;
 }
 
-
-async function GetOS(codigo_os) {
-    const [rows] = await db.query('SELECT * FROM suportes WHERE codigo_os = ?',
+async function GetOS(codigo_os) { 
+    const [rows] = await db.query(
+        `SELECT s.*, c.nome_completo, c.telefone, c.plano 
+         FROM suportes s
+         LEFT JOIN clientes c ON s.id_cliente = c.id_cliente
+         WHERE s.os_id = ?`, 
         [codigo_os]
     );
-       return rows;
+    return rows[0]; 
 }
 
 async function GetAllOS() {
-    const [rows] = await db.query('SELECT * FROM suportes');
+    const [rows] = await db.query(
+       `SELECT s.*, c.nome_completo, c.telefone, c.plano 
+        FROM suportes s
+        LEFT JOIN clientes c ON s.id_cliente = c.id_cliente
+        ORDER BY s.status ASC, 
+                 FIELD(s.prioridade, 'Alta', 'Média', 'Baixa') ASC, 
+                 s.os_id DESC` //ordenando por status, prioridade e depois mais recente
+    );
     return rows;
 }
 
-async function UpdateOS(os_id, titulo, descricao_problema, inicio_desejado, conclusao_desejada, status, prioridade, id_cliente, id_tecnico)  {
-    const [rows] = await db.query('UPDATE suportes SET titulo = ?, descricao_problema = ?, inicio_desejado = ?, conclusao_desejada = ?, status = ?, prioridade = ?, id_cliente = ?, id_tecnico = ? WHERE os_id = ?',
-         [titulo, descricao_problema, inicio_desejado, conclusao_desejada, status, prioridade, id_cliente, id_tecnico, os_id]);
+async function UpdateOS(os_id, titulo, descricao_problema, inicio_desejado, conclusao_desejada, status, prioridade, id_cliente, id_tecnico) {
+    const [rows] = await db.query(
+        'UPDATE suportes SET titulo = ?, descricao_problema = ?, inicio_desejado = ?, conclusao_desejada = ?, status = ?, prioridade = ?, id_cliente = ?, id_tecnico = ? WHERE os_id = ?',
+        [titulo, descricao_problema, inicio_desejado, conclusao_desejada, status, prioridade, id_cliente, id_tecnico, os_id]
+    );
     return rows;
 }
-
 
 module.exports = {
     addOS,

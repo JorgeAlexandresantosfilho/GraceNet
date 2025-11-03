@@ -36,6 +36,7 @@ export interface TicketSuporte {
   atualizado: string;
   status: "Aberto" | "Em andamento" | "Resolvido";
   prioridade: "Alta" | "Média" | "Baixa";
+  inicio_desejado_input?: string;
 }
 
 export interface Equipamento {
