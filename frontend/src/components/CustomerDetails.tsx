@@ -6,7 +6,7 @@ import {
   Phone,
   MapPin,
   Wifi,
-  DollarSign, // Vamos manter o ícone, mas remover o dado
+  DollarSign, 
   Calendar,
   Edit,
   Trash2,

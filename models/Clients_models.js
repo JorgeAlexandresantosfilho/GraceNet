@@ -9,7 +9,7 @@ async function InsertCustomer(cpf, nome_completo, data_nascimento, rg, telefone,
 }
 
 async function GetAllCustomer() {
-    const [rows] = await db.query('SELECT * FROM clientes');
+    const [rows] = await db.query('SELECT * FROM clientes ORDER BY id_cliente DESC');
     return rows;
 }
 
@@ -33,8 +33,9 @@ async function UpdtCustomer(id_cliente, nome_completo, telefone, email, cep, rua
 async function DeleteCustomer(id) {
     const sql = "UPDATE clientes SET status = 0 WHERE id_cliente = ?"; 
     const [result] = await db.query(sql, [id]);
-    return result; 
+    return result;
 }
+
 module.exports = {
     InsertCustomer,
     GetAllCustomer,

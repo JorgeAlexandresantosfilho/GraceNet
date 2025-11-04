@@ -376,3 +376,27 @@ export const updateSuporteTicket = async (id: number, payload: any): Promise<Tic
     throw new Error("Falha ao atualizar o ticket.");
   }
 };
+
+
+interface DashboardStats {
+  clientes: Cliente[];
+  planos: Plano[];
+  tickets: TicketSuporte[];
+}
+
+export const getDashboardStats = async (): Promise<DashboardStats> => {
+    try {
+        // Roda todas as buscas em paralelo para ser mais rápido
+        const [clientes, planos, tickets] = await Promise.all([
+            getClientes(),
+            getPlanos(),
+            getSuporteTickets()
+        ]);
+        
+        return { clientes, planos, tickets };
+        
+    } catch (error) {
+        console.error("Erro ao buscar dados do dashboard:", error);
+        throw new Error("Não foi possível carregar os dados do dashboard.");
+    }
+};
