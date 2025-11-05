@@ -1,139 +1,161 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, Wifi, Lock, Mail } from 'lucide-react';
+import { Wifi, User, Lock } from 'lucide-react';
+
 
 interface LoginProps {
-  onLogin: () => void;
-  // onRegistro: () => void;
-  // onRecuperarSenha: () => void;
+  onLoginSuccess: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onLogin }) => {
-  const [email, setEmail] = useState('');
+const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
+  const [matricula, setMatricula] = useState('');
   const [senha, setSenha] = useState('');
-  const [mostrarSenha, setMostrarSenha] = useState(false);
-  const [isCarregando, setIsCarregando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsCarregando(true);
-    
-    // Simular autenticação
+    setLoading(true);
+    setError(null);
+
+    if (!matricula || !senha) {
+      setError('Matrícula e senha são obrigatórios.');
+      setLoading(false);
+      return;
+    }
+
+    // Simulação de chamada de API
     setTimeout(() => {
-      setIsCarregando(false);
-      onLogin();
-    }, 1500);
+      console.log('Tentando login com:', { matricula, senha });
+      
+      onLoginSuccess(); 
+
+      setLoading(false);
+    }, 1000);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        {/* Logo e Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+      <div className="w-full max-w-md">
+        
+        {/* Logo e Título */}
+        <div className="flex flex-col items-center mb-6">
+          <div className="p-4 bg-blue-600 rounded-full mb-3">
             <Wifi className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">ISP Manager</h1>
+          <h1 className="text-3xl font-bold text-gray-900">ISP Manager</h1>
           <p className="text-gray-600">Sistema de Gestão para Provedores</p>
         </div>
 
-        {/* Form de Login */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Bem-vindo de volta</h2>
-            <p className="text-gray-600">Entre com suas credenciais para acessar o sistema</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Card de Login */}
+        <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+          <h2 className="text-2xl font-semibold text-center text-gray-800 mb-1">Bem-vindo de volta</h2>
+          <p className="text-center text-gray-500 mb-6">Entre com suas credenciais para acessar o sistema</p>
+          
+          <form onSubmit={handleLogin} className="space-y-6">
+            
+            {/* Campo Matrícula */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email
+              <label htmlFor="matricula" className="block text-sm font-medium text-gray-700">
+                Matrícula
               </label>
-              <div className="relative">
-                <Mail className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+              <div className="relative mt-1">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className="w-5 h-5 text-gray-400" />
+                </div>
                 <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                  placeholder="seu@email.com"
+                  id="matricula"
+                  name="matricula"
+                  type="text"
+                  autoComplete="username"
                   required
+                  value={matricula}
+                  onChange={(e) => setMatricula(e.target.value)}
+                  placeholder="Sua matrícula"
+                  className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 
+                  focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
 
+            {/* Campo Senha */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Senha
-              </label>
-              <div className="relative">
-                <Lock className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+              <div className="flex items-center justify-between">
+                <label htmlFor="password"
+                  className="block text-sm font-medium text-gray-700">
+                  Senha
+                </label>
+                <a href="#" className="text-sm text-blue-600 hover:underline">
+                  Esqueceu sua senha?
+                </a>
+              </div>
+              <div className="relative mt-1">
+                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="w-5 h-5 text-gray-400" />
+                </div>
                 <input
                   id="password"
-                  type={mostrarSenha ? 'text' : 'password'}
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                   placeholder="••••••••"
-                  required
+                  className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 
+                  focus:ring-blue-500 focus:border-transparent"
                 />
-                <button
-                  type="button"
-                  onClick={() => setMostrarSenha(!mostrarSenha)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {mostrarSenha ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
+              </div>
+            </div>
+            
+            {error && (
+                <div className="p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+                    {error}
+                </div>
+            )}
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                  Lembrar de mim
+                </label>
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <span className="ml-2 text-sm text-gray-600">Lembrar de mim</span>
-              </label>
+            {/* Botão Entrar */}
+            <div>
               <button
-                type="button"
-                // onClick={onRecuperarSenha}
-                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                type="submit"
+                disabled={loading}
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm 
+                text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none 
+                focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+                disabled:bg-blue-400 disabled:cursor-not-allowed"
               >
-                Esqueci minha senha
+                {loading ? 'Entrando...' : 'Entrar'}
               </button>
             </div>
-
-            <button
-              type="submit"
-              disabled={isCarregando}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center"
-            >
-              {isCarregando ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                'Entrar'
-              )}
-            </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
+          {/* Link Cadastre-se */}
+          <div className="text-center mt-6">
+            <p className="text-sm text-gray-600">
               Não tem uma conta?{' '}
-              <button
-                // onClick={onRegistro}
-                className="text-blue-600 hover:text-blue-800 font-medium"
-              >
+              <a href="#" className="font-medium text-blue-600 hover:underline">
                 Cadastre-se
-              </button>
+              </a>
             </p>
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="text-center mt-8 text-sm text-gray-500">
-          <p>© 2025 ISP Manager. Todos os direitos reservados.</p>
-        </div>
+        
+        <p className="text-center text-xs text-gray-500 mt-8">
+            © 2025 ISP Manager. Todos os direitos reservados.
+        </p>
       </div>
     </div>
   );

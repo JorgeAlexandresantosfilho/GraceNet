@@ -48,7 +48,7 @@ function App() {
 
   const renderizarAutenticacao = () => {
     return (
-      <Login onLogin={() => {setIsAutenticado(true)}}/>
+      <Login onLoginSuccess={() => {setIsAutenticado(true)}}/>
     );
   };
 
