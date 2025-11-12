@@ -20,7 +20,9 @@
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
-    "excel4node": "^1.8.2"
+    "excel4node": "^1.8.2",
+    "jsonwebtoken": "^9.0.2"
   }
 }

@@ -8,6 +8,7 @@ const os_routes = require('./routes/support_routes');
 const equip_routes = require('./routes/equip_routes');
 const pop_routes = require('./routes/pop_routes');
 const mov_routes = require('./routes/mov_routes');
+const user_routes = require('./routes/user_routes');
 
 app.use(cors());
 
@@ -26,5 +27,7 @@ app.use('/Equip', equip_routes);
 app.use('/Pop', pop_routes);
 
 app.use('/Mov', mov_routes);
+
+app.use('/auth', user_routes);
 
 module.exports = app;

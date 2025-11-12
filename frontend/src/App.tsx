@@ -1,4 +1,6 @@
 import { useState } from "react";
+// Importa a nova tela de Cadastro
+import Register from "./components/auth/Register";
 import CustomerDetails from "./components/CustomerDetails";
 import Login from "./components/auth/Login";
 import Header from "./components/Header";
@@ -17,6 +19,10 @@ function App() {
   const [idClienteSelecionado, definirIdClienteSelecionado] = useState<
     number | null
   >(null);
+  
+  // --- NOVO ESTADO ---
+  // Controla se vemos a tela de 'login' ou de 'register'
+  const [authView, setAuthView] = useState<'login' | 'register'>('login');
 
   const renderizarConteudo = () => {
     if (idClienteSelecionado) {
@@ -47,9 +53,25 @@ function App() {
   };
 
   const renderizarAutenticacao = () => {
-    return (
-      <Login onLoginSuccess={() => {setIsAutenticado(true)}}/>
-    );
+    // --- LÓGICA ATUALIZADA ---
+    // Se o estado for 'login', mostra Login.
+    // Se for 'register', mostra Register.
+    if (authView === 'login') {
+      return (
+        <Login 
+          onLogin={() => {setIsAutenticado(true)}}
+          onNavigateToRegister={() => setAuthView('register')} // Passa a função para mudar de tela
+        />
+      );
+    }
+    
+    if (authView === 'register') {
+       return (
+         <Register
+           onNavigateToLogin={() => setAuthView('login')} // Passa a função para voltar ao login
+         />
+       );
+    }
   };
 
   if (!isAutenticado) {

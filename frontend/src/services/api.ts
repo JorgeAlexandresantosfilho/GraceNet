@@ -66,6 +66,7 @@ export const createCliente = async (dadosNovoCliente: any): Promise<Cliente> => 
     throw new Error("Falha ao criar o cliente.");
   }
 };
+// CORREÇÃO: Movido para ANTES de ser usado
 const mapFrontendClienteToBackend = (cliente: Partial<Cliente>) => {
   const backendData: any = {};
   if (cliente.nomeCompleto !== undefined) backendData.nome_completo = cliente.nomeCompleto;
@@ -81,7 +82,7 @@ const mapFrontendClienteToBackend = (cliente: Partial<Cliente>) => {
 };
 export const updateCliente = async (id: number, dadosCliente: Partial<Cliente>): Promise<Partial<Cliente>> => {
   try {
-    const payload = mapFrontendClienteToBackend(dadosCliente);
+    const payload = mapFrontendClienteToBackend(dadosCliente); // Agora funciona
     Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
     await apiClient.put(`/Customer/${id}`, payload);
     return dadosCliente;
@@ -206,6 +207,31 @@ const mapBackendEquipamentoToFrontend = (backendEquip: any): Equipamento => {
     lastMaintenance: null,
   };
 };
+// ADICIONADO: mapFrontendEquipamentoToBackend
+type DadosEquipamentoBackend = {
+    tipo: string;
+    modelo: string;
+    fabricante?: string;
+    numero_serie: string;
+    mac_adress?: string;
+    ip_gerenciado?: string;
+    firmware?: string;
+    status: string;
+    localizacao: string;
+};
+const mapFrontendEquipamentoToBackend = (equip: Partial<Equipamento>): Partial<DadosEquipamentoBackend> => {
+    const backendData: Partial<DadosEquipamentoBackend> = {};
+    if (equip.type !== undefined) backendData.tipo = equip.type;
+    if (equip.model !== undefined) backendData.modelo = equip.model;
+    if (equip.serialNumber !== undefined) backendData.numero_serie = equip.serialNumber;
+    if (equip.status !== undefined) backendData.status = equip.status;
+    if (equip.location !== undefined) backendData.localizacao = equip.location;
+    if ((equip as any).fabricante !== undefined) backendData.fabricante = (equip as any).fabricante;
+    if ((equip as any).mac_adress !== undefined) backendData.mac_adress = (equip as any).mac_adress;
+    if ((equip as any).ip_gerenciado !== undefined) backendData.ip_gerenciado = (equip as any).ip_gerenciado;
+    if ((equip as any).firmware !== undefined) backendData.firmware = (equip as any).firmware;
+    return backendData;
+};
 export const getEquipamentos = async (): Promise<Equipamento[]> => {
   try {
     const response = await apiClient.get('/Equip');
@@ -219,6 +245,7 @@ export const getEquipamentos = async (): Promise<Equipamento[]> => {
 export const getEquipamentoBySerial = async (serialNumber: string): Promise<Equipamento> => {
   try {
     const response = await apiClient.get(`/Equip/${serialNumber}`);
+    // CORREÇÃO: Seu controller (corrigido) envia o objeto direto
     if (response.data) {
       return mapBackendEquipamentoToFrontend(response.data);
     } else {
@@ -256,9 +283,10 @@ export const createEquipamento = async (dadosEquip: any): Promise<Equipamento> =
 };
 export const updateEquipamento = async (serialNumber: string, dadosEquip: Partial<Equipamento>): Promise<Partial<Equipamento>> => {
   try {
-    // A função mapFrontendEquipamentoToBackend não está definida aqui, vamos simplificar
-    // Assumindo que dadosEquip já está no formato do backend (ou muito próximo)
-    await apiClient.put(`/Equip/${serialNumber}`, dadosEquip);
+    // CORREÇÃO: Usa o mapeador
+    const payload = mapFrontendEquipamentoToBackend(dadosEquip);
+    Object.keys(payload).forEach(key => (payload as any)[key] === undefined && delete (payload as any)[key]);
+    await apiClient.put(`/Equip/${serialNumber}`, payload);
     return dadosEquip;
   } catch (error) {
     console.error(`Erro ao atualizar equipamento ${serialNumber}:`, error);
@@ -278,15 +306,14 @@ export const deleteEquipamento = async (serialNumber: string): Promise<void> => 
 };
 
 // ===================================================================
-// FUNÇÕES DE SUPORTE
+// FUNÇÕES DE SUPORTE (ADICIONADAS)
 // ===================================================================
-const ROTA_SUPORTE = '/Support'; // <<< AJUSTE AQUI SE A ROTA FOR OUTRA (ex: /OS)
-
+const ROTA_SUPORTE = '/Support'; // Assumindo /Support
 const mapBackendSuporteToFrontend = (backendTicket: any): TicketSuporte => {
     const formatarDataInput = (data: string | null) => {
         if (!data) return "";
         try {
-            return new Date(data).toISOString().split('T')[0]; // Retorna YYYY-MM-DD
+            return new Date(data).toISOString().split('T')[0];
         } catch (e) {
             return "";
         }
@@ -294,12 +321,11 @@ const mapBackendSuporteToFrontend = (backendTicket: any): TicketSuporte => {
     const formatarDataExibicao = (data: string | null) => {
          if (!data) return "N/A";
          try {
-            return new Date(data).toLocaleDateString('pt-BR', { timeZone: 'UTC' }); // Retorna dd/mm/yyyy
+            return new Date(data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
          } catch (e) {
              return "Data inválida";
          }
     };
-
     return {
         id: backendTicket.os_id,
         titulo: backendTicket.titulo || '',
@@ -312,13 +338,9 @@ const mapBackendSuporteToFrontend = (backendTicket: any): TicketSuporte => {
         categoria: backendTicket.categoria || 'Não categorizado',
         criado: formatarDataExibicao(backendTicket.inicio_desejado),
         atualizado: formatarDataExibicao(backendTicket.conclusao_desejada), 
-        
-        // <<< --- CORREÇÃO AQUI --- >>>
-        // O tipo TicketSuporte (em types.ts) agora aceita este campo
         inicio_desejado_input: formatarDataInput(backendTicket.inicio_desejado),
     };
 };
-
 export const getSuporteTickets = async (): Promise<TicketSuporte[]> => {
   try {
     const response = await apiClient.get(ROTA_SUPORTE);
@@ -328,7 +350,6 @@ export const getSuporteTickets = async (): Promise<TicketSuporte[]> => {
     throw new Error("Não foi possível carregar os tickets de suporte.");
   }
 };
-
 export const getSuporteTicketById = async (id: number): Promise<TicketSuporte> => {
   try {
     const response = await apiClient.get(`${ROTA_SUPORTE}/${id}`);
@@ -342,12 +363,9 @@ export const getSuporteTicketById = async (id: number): Promise<TicketSuporte> =
     throw new Error("Falha ao carregar dados do ticket.");
   }
 };
-
 export const createSuporteTicket = async (payload: any): Promise<TicketSuporte> => {
   try {
-    // O payload já vem pronto do modal
     const response = await apiClient.post(ROTA_SUPORTE, payload);
-
     if (response.data.result?.insertId) {
       const novoId = response.data.result.insertId;
       return await getSuporteTicketById(novoId);
@@ -362,10 +380,8 @@ export const createSuporteTicket = async (payload: any): Promise<TicketSuporte> 
     throw new Error("Falha ao criar o ticket.");
   }
 };
-
 export const updateSuporteTicket = async (id: number, payload: any): Promise<TicketSuporte> => {
   try {
-    // O payload já vem pronto do modal
     await apiClient.put(`${ROTA_SUPORTE}/${id}`, payload);
     return await getSuporteTicketById(id);
   } catch (error) {
@@ -377,7 +393,48 @@ export const updateSuporteTicket = async (id: number, payload: any): Promise<Tic
   }
 };
 
+// ===================================================================
+// FUNÇÕES DE AUTENTICAÇÃO (ADICIONADAS)
+// ===================================================================
+export const registerUser = async (dadosCadastro: any) => {
+    try {
+        const response = await apiClient.post('/auth/register', dadosCadastro);
+        return response.data;
+    } catch (error: any) {
+        console.error('Erro ao registrar usuário:', error);
+        if (axios.isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.msg || "Falha ao registrar.");
+        }
+        throw new Error("Falha ao registrar.");
+    }
+};
+export const loginUser = async (login: string, senha: string) => {
+    try {
+        const response = await apiClient.post('/auth/login', { login, senha });
+        const { token, user } = response.data;
+        if (token) {
+            localStorage.setItem('authToken', token);
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            return response.data;
+        } else {
+            throw new Error("Token não recebido.");
+        }
+    } catch (error: any) {
+        console.error('Erro ao fazer login:', error);
+        if (axios.isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.msg || "Falha no login.");
+        }
+        throw new Error("Falha no login.");
+    }
+};
+export const logoutUser = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('currentUser');
+};
 
+// ===================================================================
+// FUNÇÃO DO DASHBOARD (ADICIONADA)
+// ===================================================================
 interface DashboardStats {
   clientes: Cliente[];
   planos: Plano[];
