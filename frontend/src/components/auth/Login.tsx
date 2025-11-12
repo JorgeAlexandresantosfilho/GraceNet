@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { Wifi, User, Lock } from 'lucide-react';
+import { Wifi, User, Lock, Send } from 'lucide-react';
 // Importa a função de login da API
 import { loginUser } from '../../services/api';
 
 interface LoginProps {
-  onLogin: () => void; // Função do App.tsx para dizer que logou
-  onNavigateToRegister: () => void; // Função do App.tsx para mostrar o cadastro
+  onLogin: () => void;
+  onNavigateToRegister: () => void;
+  onNavigateToPublicTicket: () => void; // <<< --- ADICIONE ESTA LINHA --- >>>
 }
 
-const Login: React.FC<LoginProps> = ({ onLogin, onNavigateToRegister }) => {
+const Login: React.FC<LoginProps> = ({ onLogin, onNavigateToRegister, onNavigateToPublicTicket }) => {
   const [login, setLogin] = useState('');
   const [senha, setSenha] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -24,17 +25,10 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateToRegister }) => {
       setLoading(false);
       return;
     }
-
-    // --- LÓGICA DE LOGIN REAL ---
     try {
-      // 1. Chamar a API
       await loginUser(login, senha);
-      
-      // 2. Avisar o App.tsx que o login foi feito
       onLogin();
-
     } catch (err: any) {
-      // 3. Se a API der erro, 'err.message' terá a msg (ex: "Login ou senha inválida")
       setError(err.message);
     } finally {
       setLoading(false);
@@ -54,115 +48,86 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateToRegister }) => {
         </div>
 
         <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-200">
-          <h2 className="text-2xl font-semibold text-center text-gray-800 mb-1">Bem-vindo de volta</h2>
-          <p className="text-center text-gray-500 mb-6">Entre com suas credenciais para acessar o sistema</p>
+          <h2 className="text-2xl font-semibold text-center text-gray-800 mb-1">Acesso do Administrador</h2>
+          <p className="text-center text-gray-500 mb-6">Use seu login e senha</p>
           
           <form onSubmit={handleLogin} className="space-y-6">
             
             <div>
-              <label htmlFor="login" className="block text-sm font-medium text-gray-700">
-                Login
-              </label>
+              <label htmlFor="login" className="block text-sm font-medium text-gray-700">Login</label>
               <div className="relative mt-1">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <User className="w-5 h-5 text-gray-400" />
                 </div>
-                <input
-                  id="login"
-                  name="login"
-                  type="text"
-                  autoComplete="username"
-                  required
-                  value={login}
-                  onChange={(e) => setLogin(e.target.value)}
+                <input id="login" name="login" type="text" autoComplete="username" required
+                  value={login} onChange={(e) => setLogin(e.target.value)}
                   placeholder="Seu login de usuário"
-                  className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 
-                  focus:ring-blue-500 focus:border-transparent"
+                  className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between">
-                <label htmlFor="password"
-                  className="block text-sm font-medium text-gray-700">
-                  Senha
-                </label>
-                <a href="#" className="text-sm text-blue-600 hover:underline">
-                  Esqueceu sua senha?
-                </a>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">Senha</label>
+                <a href="#" className="text-sm text-blue-600 hover:underline">Esqueceu sua senha?</a>
               </div>
               <div className="relative mt-1">
                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="w-5 h-5 text-gray-400" />
                 </div>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
+                <input id="password" name="password" type="password" autoComplete="current-password" required
+                  value={senha} onChange={(e) => setSenha(e.target.value)}
                   placeholder="••••••••"
-                  className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 
-                  focus:ring-blue-500 focus:border-transparent"
+                  className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
             
             {error && (
-                <div className="p-3 bg-red-100 text-red-700 rounded-lg text-sm">
-                    {error}
-                </div>
+                <div className="p-3 bg-red-100 text-red-700 rounded-lg text-sm">{error}</div>
             )}
 
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                  Lembrar de mim
-                </label>
+                <input id="remember-me" name="remember-me" type="checkbox"
+                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">Lembrar de mim</label>
               </div>
             </div>
 
             <div>
-              <button
-                type="submit"
-                disabled={loading}
+              <button type="submit" disabled={loading}
                 className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm 
                 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none 
-                focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
-                disabled:bg-blue-400 disabled:cursor-not-allowed"
+                focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400"
               >
                 {loading ? 'Entrando...' : 'Entrar'}
               </button>
             </div>
           </form>
 
-          <div className="text-center mt-6">
+          {/* Links de Navegação */}
+          <div className="text-center mt-6 space-y-2">
             <p className="text-sm text-gray-600">
-              Não tem uma conta?{' '}
-              {/* --- MUDANÇA AQUI --- */}
-              <button
-                type="button"
-                onClick={onNavigateToRegister}
-                className="font-medium text-blue-600 hover:underline"
-              >
+              Não tem uma conta de admin?{' '}
+              <button type="button" onClick={onNavigateToRegister}
+                className="font-medium text-blue-600 hover:underline">
                 Cadastre-se
+              </button>
+            </p>
+            {/* --- LINK PARA O PORTAL DO CLIENTE --- */}
+            <p className="text-sm text-gray-600">
+              É cliente?{' '}
+              <button 
+                type="button" 
+                onClick={onNavigateToPublicTicket} // <<< --- ADICIONE ESTA LINHA --- >>>
+                className="font-medium text-green-600 hover:underline">
+                Abrir um chamado de suporte
               </button>
             </p>
           </div>
         </div>
-        
-        <p className="text-center text-xs text-gray-500 mt-8">
-            © 2025 ISP Manager. Todos os direitos reservados.
-        </p>
       </div>
     </div>
   );

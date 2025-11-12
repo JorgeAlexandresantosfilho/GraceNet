@@ -1,6 +1,6 @@
 import axios from 'axios';
-// Adiciona Equipamento e TicketSuporte aos tipos
-import type { Cliente, Plano, Equipamento, TicketSuporte } from '../types';
+// Adiciona 'Usuario' aos tipos
+import type { Cliente, Plano, Equipamento, TicketSuporte, Usuario } from '../types';
 
 // Configura a URL base do seu backend.
 const apiClient = axios.create({
@@ -66,23 +66,9 @@ export const createCliente = async (dadosNovoCliente: any): Promise<Cliente> => 
     throw new Error("Falha ao criar o cliente.");
   }
 };
-// CORREÇÃO: Movido para ANTES de ser usado
-const mapFrontendClienteToBackend = (cliente: Partial<Cliente>) => {
-  const backendData: any = {};
-  if (cliente.nomeCompleto !== undefined) backendData.nome_completo = cliente.nomeCompleto;
-  if (cliente.telefone !== undefined) backendData.telefone = cliente.telefone;
-  if (cliente.email !== undefined) backendData.email = cliente.email;
-  if (cliente.cep !== undefined) backendData.cep = cliente.cep;
-  if (cliente.rua !== undefined) backendData.rua = cliente.rua;
-  if (cliente.numero !== undefined) backendData.numero = cliente.numero;
-  if (cliente.plano !== undefined) backendData.plano = cliente.plano;
-  if (cliente.status !== undefined) backendData.status = cliente.status === 'Ativo' ? 1 : 0;
-  if (cliente.vencimento !== undefined) backendData.vencimento = cliente.vencimento.replace('Todo dia ', '');
-  return backendData;
-};
 export const updateCliente = async (id: number, dadosCliente: Partial<Cliente>): Promise<Partial<Cliente>> => {
   try {
-    const payload = mapFrontendClienteToBackend(dadosCliente); // Agora funciona
+    const payload = mapFrontendClienteToBackend(dadosCliente);
     Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
     await apiClient.put(`/Customer/${id}`, payload);
     return dadosCliente;
@@ -98,6 +84,19 @@ export const deleteCliente = async (id: number): Promise<void> => {
     console.error(`Erro ao inativar cliente ${id}:`, error);
     throw new Error("Falha ao inativar o cliente.");
   }
+};
+const mapFrontendClienteToBackend = (cliente: Partial<Cliente>) => {
+  const backendData: any = {};
+  if (cliente.nomeCompleto !== undefined) backendData.nome_completo = cliente.nomeCompleto;
+  if (cliente.telefone !== undefined) backendData.telefone = cliente.telefone;
+  if (cliente.email !== undefined) backendData.email = cliente.email;
+  if (cliente.cep !== undefined) backendData.cep = cliente.cep;
+  if (cliente.rua !== undefined) backendData.rua = cliente.rua;
+  if (cliente.numero !== undefined) backendData.numero = cliente.numero;
+  if (cliente.plano !== undefined) backendData.plano = cliente.plano;
+  if (cliente.status !== undefined) backendData.status = cliente.status === 'Ativo' ? 1 : 0;
+  if (cliente.vencimento !== undefined) backendData.vencimento = cliente.vencimento.replace('Todo dia ', '');
+  return backendData;
 };
 
 // ===================================================================
@@ -207,31 +206,6 @@ const mapBackendEquipamentoToFrontend = (backendEquip: any): Equipamento => {
     lastMaintenance: null,
   };
 };
-// ADICIONADO: mapFrontendEquipamentoToBackend
-type DadosEquipamentoBackend = {
-    tipo: string;
-    modelo: string;
-    fabricante?: string;
-    numero_serie: string;
-    mac_adress?: string;
-    ip_gerenciado?: string;
-    firmware?: string;
-    status: string;
-    localizacao: string;
-};
-const mapFrontendEquipamentoToBackend = (equip: Partial<Equipamento>): Partial<DadosEquipamentoBackend> => {
-    const backendData: Partial<DadosEquipamentoBackend> = {};
-    if (equip.type !== undefined) backendData.tipo = equip.type;
-    if (equip.model !== undefined) backendData.modelo = equip.model;
-    if (equip.serialNumber !== undefined) backendData.numero_serie = equip.serialNumber;
-    if (equip.status !== undefined) backendData.status = equip.status;
-    if (equip.location !== undefined) backendData.localizacao = equip.location;
-    if ((equip as any).fabricante !== undefined) backendData.fabricante = (equip as any).fabricante;
-    if ((equip as any).mac_adress !== undefined) backendData.mac_adress = (equip as any).mac_adress;
-    if ((equip as any).ip_gerenciado !== undefined) backendData.ip_gerenciado = (equip as any).ip_gerenciado;
-    if ((equip as any).firmware !== undefined) backendData.firmware = (equip as any).firmware;
-    return backendData;
-};
 export const getEquipamentos = async (): Promise<Equipamento[]> => {
   try {
     const response = await apiClient.get('/Equip');
@@ -245,7 +219,6 @@ export const getEquipamentos = async (): Promise<Equipamento[]> => {
 export const getEquipamentoBySerial = async (serialNumber: string): Promise<Equipamento> => {
   try {
     const response = await apiClient.get(`/Equip/${serialNumber}`);
-    // CORREÇÃO: Seu controller (corrigido) envia o objeto direto
     if (response.data) {
       return mapBackendEquipamentoToFrontend(response.data);
     } else {
@@ -283,10 +256,8 @@ export const createEquipamento = async (dadosEquip: any): Promise<Equipamento> =
 };
 export const updateEquipamento = async (serialNumber: string, dadosEquip: Partial<Equipamento>): Promise<Partial<Equipamento>> => {
   try {
-    // CORREÇÃO: Usa o mapeador
-    const payload = mapFrontendEquipamentoToBackend(dadosEquip);
-    Object.keys(payload).forEach(key => (payload as any)[key] === undefined && delete (payload as any)[key]);
-    await apiClient.put(`/Equip/${serialNumber}`, payload);
+    // A função mapFrontendEquipamentoToBackend não está definida aqui, vamos simplificar
+    await apiClient.put(`/Equip/${serialNumber}`, dadosEquip);
     return dadosEquip;
   } catch (error) {
     console.error(`Erro ao atualizar equipamento ${serialNumber}:`, error);
@@ -306,9 +277,9 @@ export const deleteEquipamento = async (serialNumber: string): Promise<void> => 
 };
 
 // ===================================================================
-// FUNÇÕES DE SUPORTE (ADICIONADAS)
+// FUNÇÕES DE SUPORTE
 // ===================================================================
-const ROTA_SUPORTE = '/Support'; // Assumindo /Support
+const ROTA_SUPORTE = '/Support';
 const mapBackendSuporteToFrontend = (backendTicket: any): TicketSuporte => {
     const formatarDataInput = (data: string | null) => {
         if (!data) return "";
@@ -339,6 +310,7 @@ const mapBackendSuporteToFrontend = (backendTicket: any): TicketSuporte => {
         criado: formatarDataExibicao(backendTicket.inicio_desejado),
         atualizado: formatarDataExibicao(backendTicket.conclusao_desejada), 
         inicio_desejado_input: formatarDataInput(backendTicket.inicio_desejado),
+        id_tecnico: backendTicket.id_tecnico || null, // <<< --- CAMPO ADICIONADO --- >>>
     };
 };
 export const getSuporteTickets = async (): Promise<TicketSuporte[]> => {
@@ -394,7 +366,7 @@ export const updateSuporteTicket = async (id: number, payload: any): Promise<Tic
 };
 
 // ===================================================================
-// FUNÇÕES DE AUTENTICAÇÃO (ADICIONADAS)
+// FUNÇÕES DE AUTENTICAÇÃO
 // ===================================================================
 export const registerUser = async (dadosCadastro: any) => {
     try {
@@ -433,25 +405,36 @@ export const logoutUser = () => {
 };
 
 // ===================================================================
-// FUNÇÃO DO DASHBOARD (ADICIONADA)
+// --- FUNÇÃO NOVA PARA BUSCAR USUÁRIOS/TÉCNICOS ---
+// ===================================================================
+export const getUsuarios = async (): Promise<Usuario[]> => {
+    try {
+        // Rota: GET /auth/users
+        const response = await apiClient.get('/auth/users');
+        // O controller GetAllUsers retorna o array direto
+        return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+        console.error('Erro ao buscar usuários:', error);
+        throw new Error("Falha ao carregar lista de técnicos.");
+    }
+};
+
+// ===================================================================
+// FUNÇÃO DO DASHBOARD
 // ===================================================================
 interface DashboardStats {
   clientes: Cliente[];
   planos: Plano[];
   tickets: TicketSuporte[];
 }
-
 export const getDashboardStats = async (): Promise<DashboardStats> => {
     try {
-        // Roda todas as buscas em paralelo para ser mais rápido
         const [clientes, planos, tickets] = await Promise.all([
             getClientes(),
             getPlanos(),
             getSuporteTickets()
         ]);
-        
         return { clientes, planos, tickets };
-        
     } catch (error) {
         console.error("Erro ao buscar dados do dashboard:", error);
         throw new Error("Não foi possível carregar os dados do dashboard.");

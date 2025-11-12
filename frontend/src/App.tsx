@@ -1,6 +1,7 @@
 import { useState } from "react";
-// Importa a nova tela de Cadastro
+// Importa as novas telas
 import Register from "./components/auth/Register";
+import PublicTicketForm from "./components/auth/PublicTicketForm";
 import CustomerDetails from "./components/CustomerDetails";
 import Login from "./components/auth/Login";
 import Header from "./components/Header";
@@ -12,17 +13,20 @@ import Equipment from "./components/Equipment";
 import Support from "./components/Support";
 import Reports from "./components/Reports";
 
+// Adiciona o novo tipo de página
+type Pagina = "dashboard" | "clientes" | "planos" | "equipamentos" | "suporte" | "relatorios";
+// Adiciona a nova visualização de autenticação
+type AuthView = 'login' | 'register' | 'publicTicket';
+
 function App() {
   const [isAutenticado, setIsAutenticado] = useState(false);
-  const [abaAtiva, definirAbaAtiva] = useState("dashboard");
+  const [abaAtiva, definirAbaAtiva] = useState<Pagina>("dashboard");
   const [barraLateralRecolhida, definirBarraLateralRecolhida] = useState(false);
   const [idClienteSelecionado, definirIdClienteSelecionado] = useState<
     number | null
   >(null);
   
-  // --- NOVO ESTADO ---
-  // Controla se vemos a tela de 'login' ou de 'register'
-  const [authView, setAuthView] = useState<'login' | 'register'>('login');
+  const [authView, setAuthView] = useState<AuthView>('login');
 
   const renderizarConteudo = () => {
     if (idClienteSelecionado) {
@@ -53,24 +57,29 @@ function App() {
   };
 
   const renderizarAutenticacao = () => {
-    // --- LÓGICA ATUALIZADA ---
-    // Se o estado for 'login', mostra Login.
-    // Se for 'register', mostra Register.
-    if (authView === 'login') {
-      return (
-        <Login 
-          onLogin={() => {setIsAutenticado(true)}}
-          onNavigateToRegister={() => setAuthView('register')} // Passa a função para mudar de tela
-        />
-      );
-    }
-    
-    if (authView === 'register') {
-       return (
-         <Register
-           onNavigateToLogin={() => setAuthView('login')} // Passa a função para voltar ao login
-         />
-       );
+    switch (authView) {
+      case 'login':
+        return (
+          <Login 
+            onLogin={() => {setIsAutenticado(true)}}
+            onNavigateToRegister={() => setAuthView('register')}
+            onNavigateToPublicTicket={() => setAuthView('publicTicket')} 
+          />
+        );
+      case 'register':
+         return (
+           <Register
+             onNavigateToLogin={() => setAuthView('login')}
+           />
+         );
+      case 'publicTicket':
+          return (
+            <PublicTicketForm
+              onNavigateToLogin={() => setAuthView('login')}
+            />
+          );
+      default:
+        return <div>Erro de navegação</div>;
     }
   };
 
@@ -82,7 +91,9 @@ function App() {
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar
         abaAtiva={abaAtiva}
-        definirAbaAtiva={definirAbaAtiva}
+        // <<< --- CORREÇÃO AQUI --- >>>
+        // Passa uma função que aceita 'string' (como o Sidebar espera)
+        definirAbaAtiva={(tab: string) => definirAbaAtiva(tab as Pagina)}
         recolhida={barraLateralRecolhida}
         definirRecolhida={definirBarraLateralRecolhida}
       />
@@ -91,7 +102,9 @@ function App() {
           barraLateralRecolhida ? "ml-16" : "ml-64"
         }`}
       >
-        <Header />
+        {/* <<< --- CORREÇÃO AQUI --- >>> */}
+        {/* Removemos a prop 'onLogout' por enquanto, já que o Header não a aceita */}
+        <Header /> 
         <main className="flex-1 p-6 overflow-auto">{renderizarConteudo()}</main>
       </div>
     </div>

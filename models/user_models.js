@@ -12,7 +12,6 @@ async function InsertUser(nome_completo, matricula, login, senha, perfil_id = nu
     return result;
 }
 
-
 async function FindUserByLogin(login) {
     const [rows] = await db.query(
         'SELECT * FROM usuarios WHERE login = ?',
@@ -20,7 +19,6 @@ async function FindUserByLogin(login) {
     );
     return rows[0];
 }
-
 
 async function FindUserByMatricula(matricula) {
     const [rows] = await db.query(
@@ -30,8 +28,16 @@ async function FindUserByMatricula(matricula) {
     return rows[0];
 }
 
+async function GetAllUsers() {
+    const [rows] = await db.query(
+        "SELECT usuario_id, nome_completo, perfil_id FROM usuarios WHERE status_usuario = 'Ativo' ORDER BY nome_completo ASC"
+    );
+    return rows;
+}
+
 module.exports = {
     InsertUser,
     FindUserByLogin,
-    FindUserByMatricula
+    FindUserByMatricula,
+    GetAllUsers 
 };

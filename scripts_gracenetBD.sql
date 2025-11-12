@@ -9,8 +9,9 @@ DROP TABLE IF EXISTS clientes;
 DROP PROCEDURE sp_cliente_deletar;
 SELECT * FROM clientes;
 SELECT * FROM tecnicos;
-SELECT * FROM suportes;
+SELECT * FROM usuarios;
 SELECT * FROM equipamentos;
+ALTER TABLE suportes MODIFY COLUMN status VARCHAR(20);
 ALTER TABLE equipamentos MODIFY COLUMN status VARCHAR(20);
 INSERT INTO usuarios (matricula, nome_completo, login, senha_hash, perfil_id, status_usuario)
 VALUES 
@@ -39,7 +40,7 @@ CREATE TABLE clientes (
 
 USE GraceNet;
 ALTER TABLE suportes ADD COLUMN codigo_os VARCHAR(20) UNIQUE;
-
+ALTER TABLE usuarios ADD COLUMN senha_hash VARCHAR(255) NOT NULL;
 DELIMITER //
 CREATE TRIGGER gerar_codigo_os
 BEFORE INSERT ON suportes
@@ -184,6 +185,11 @@ CREATE TABLE usuarios(
     ultimo_login TIMESTAMP,
     FOREIGN KEY (perfil_id) REFERENCES perfis_acesso(perfil_id)
 ) ENGINE=InnoDB;
+ALTER TABLE usuarios ADD COLUMN status_usuario ENUM('Ativo', 'Inativo', 'Bloqueado') DEFAULT 'Ativo' NOT NULL;
+ALTER TABLE usuarios DROP COLUMN senha;
+ALTER TABLE usuarios DROP COLUMN status_usuario;
+ALTER TABLE usuarios ADD COLUMN senha VARCHAR(16) NOT NULL;
+ALTER TABLE usuarios MODIFY COLUMN ultimo_login DATETIME DEFAULT CURRENT_TIMESTAMP;
 ALTER TABLE suportes ADD COLUMN data_interacao DATETIME DEFAULT CURRENT_TIMESTAMP;
 ALTER TABLE usuarios DROP COLUMN data_modificacao;
 ALTER TABLE usuarios MODIFY COLUMN status_usuario ENUM('Ativo', 'Inativo', 'Bloqueado') DEFAULT 'Ativo';

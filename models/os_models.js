@@ -5,29 +5,31 @@ async function addOS(titulo, descricao_problema, inicio_desejado, conclusao_dese
         'INSERT INTO suportes (titulo, descricao_problema, inicio_desejado, conclusao_desejada, status, prioridade, id_cliente, id_tecnico) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
         [titulo, descricao_problema, inicio_desejado, conclusao_desejada, status, prioridade, id_cliente, id_tecnico]
     );
-
     return result;
 }
 
-async function GetOS(codigo_os) { 
+async function GetOS(codigo_os) {
     const [rows] = await db.query(
         `SELECT s.*, c.nome_completo, c.telefone, c.plano 
          FROM suportes s
          LEFT JOIN clientes c ON s.id_cliente = c.id_cliente
-         WHERE s.os_id = ?`, 
+         WHERE s.os_id = ?`,
         [codigo_os]
     );
-    return rows[0]; 
+    return rows[0];
 }
 
 async function GetAllOS() {
+
     const [rows] = await db.query(
-       `SELECT s.*, c.nome_completo, c.telefone, c.plano 
+       `SELECT s.os_id, s.titulo, s.status, s.prioridade, s.id_cliente, s.id_tecnico,
+               s.descricao_problema, s.inicio_desejado, s.conclusao_desejada,
+               c.nome_completo, c.telefone, c.plano 
         FROM suportes s
         LEFT JOIN clientes c ON s.id_cliente = c.id_cliente
         ORDER BY s.status ASC, 
                  FIELD(s.prioridade, 'Alta', 'Média', 'Baixa') ASC, 
-                 s.os_id DESC` //ordenando por status, prioridade e depois mais recente
+                 s.os_id DESC`
     );
     return rows;
 }
