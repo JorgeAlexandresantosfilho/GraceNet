@@ -21,31 +21,10 @@ async function RegisterUser(req, res) {
         
         const result = await user_models.InsertUser(nome_completo, matricula, login, senha, perfil_id);
         
+  
         
-        try {
-            await db.query("SELECT senha_hash FROM usuarios LIMIT 1");
-        } catch (e) {
-            if (e.code === 'ER_BAD_FIELD_ERROR') {
-                await db.query("ALTER TABLE usuarios ADD COLUMN senha_hash VARCHAR(255) NOT NULL;");
-            }
-        }
-      
-         try {
-            await db.query("SELECT status_usuario FROM usuarios LIMIT 1");
-        } catch (e) {
-            if (e.code === 'ER_BAD_FIELD_ERROR') {
-                await db.query("ALTER TABLE usuarios ADD COLUMN status_usuario ENUM('Ativo', 'Inativo', 'Bloqueado') DEFAULT 'Ativo' NOT NULL;");
-            }
-        }
-       
-         try {
-            await db.query("SELECT senha FROM usuarios LIMIT 1");
-            await db.query("ALTER TABLE usuarios DROP COLUMN senha;");
-        } catch (e) {
-            
-        }
-
         return res.status(201).json({ msg: 'Usuário criado com sucesso.', userId: result.insertId });
+
     } catch (error) {
         console.error("ERRO AO REGISTRAR USUÁRIO:", error);
         return res.status(500).json({ msg: 'Erro ao registrar usuário.', error: error.message });
@@ -93,13 +72,77 @@ async function GetAllUsers(req, res) {
         const users = await user_models.GetAllUsers();
         return res.status(200).json(users);
     } catch (error) {
-        console.error("ERRO AO BUSCAR TODOS OS USUÁRIOS:", error);
+        console.error("ERRO AO BUSCAR USUÁRIOS:", error);
         return res.status(500).json({ msg: 'Erro ao buscar usuários.', error: error.message });
+    }
+}
+
+
+
+async function GetAllUsersForAdmin(req, res) {
+    try {
+        const users = await user_models.GetAllUsersForAdmin();
+        return res.status(200).json(users);
+    } catch (error) {
+        console.error("ERRO AO BUSCAR TODOS OS USUÁRIOS (ADMIN):", error);
+        return res.status(500).json({ msg: 'Erro ao buscar usuários.', error: error.message });
+    }
+}
+
+async function GetUserById(req, res) {
+    const { id } = req.params;
+    try {
+        const user = await user_models.FindUserById(id);
+        if (!user) {
+            return res.status(404).json({ msg: 'Usuário não encontrado.' });
+        }
+        return res.status(200).json(user);
+    } catch (error) {
+        console.error(`ERRO AO BUSCAR USUÁRIO ID ${id}:`, error);
+        return res.status(500).json({ msg: 'Erro ao buscar usuário.', error: error.message });
+    }
+}
+
+
+async function UpdateUser(req, res) {
+    const { id } = req.params;
+    const { nome_completo, matricula, login, perfil_id, status_usuario } = req.body;
+
+    if (!nome_completo || !matricula || !login || !status_usuario) {
+        return res.status(400).json({ msg: 'Campos (nome, matricula, login, status) são obrigatórios.' });
+    }
+
+    try {
+        const result = await user_models.UpdateUser(id, nome_completo, matricula, login, perfil_id, status_usuario);
+        return res.status(200).json({ msg: 'Usuário atualizado com sucesso.', result });
+    } catch (error) {
+        console.error(`ERRO AO ATUALIZAR USUÁRIO ID ${id}:`, error);
+        if (error.code === 'ER_DUP_ENTRY') {
+             return res.status(409).json({ msg: 'Erro: Login ou Matrícula já está em uso por outro usuário.' });
+        }
+        return res.status(500).json({ msg: 'Erro ao atualizar usuário.', error: error.message });
+    }
+}
+
+
+async function DeleteUser(req, res) {
+    const { id } = req.params;
+    try {
+       
+        const result = await user_models.DeleteUser(id);
+        return res.status(200).json({ msg: 'Usuário inativado com sucesso.', result });
+    } catch (error) {
+        console.error(`ERRO AO INATIVAR USUÁRIO ID ${id}:`, error);
+        return res.status(500).json({ msg: 'Erro ao inativar usuário.', error: error.message });
     }
 }
 
 module.exports = {
     RegisterUser,
     LoginUser,
-    GetAllUsers 
+    GetAllUsers,
+    GetAllUsersForAdmin, 
+    GetUserById,         
+    UpdateUser,         
+    DeleteUser           
 };

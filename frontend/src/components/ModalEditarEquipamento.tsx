@@ -63,19 +63,17 @@ const ModalEditarEquipamento: React.FC<ModalEditarEquipamentoProps> = ({ serialN
 
       // Recria o objeto completo para atualizar a UI
       const equipamentoAtualizado: Equipamento = {
+        // --- CORREÇÕES AQUI ---
         id: formData.id || serialNumber,
         name: formData.fabricante ? `${formData.fabricante} ${formData.model}` : formData.model || '',
         type: formData.type || '',
         model: formData.model || '',
         serialNumber: formData.serialNumber || serialNumber,
-        // --- CORREÇÃO AQUI ---
-        // Garante que o status está no tipo correto
         status: formData.status as "Em uso" | "Disponível" | "Manutenção" | "Defeito",
         location: formData.location || '',
         customer: formData.customer || null,
         installDate: formData.installDate || null,
         lastMaintenance: formData.lastMaintenance || null,
-        // Campos extras
         fabricante: formData.fabricante,
         mac_adress: formData.mac_adress,
         ip_gerenciado: formData.ip_gerenciado,

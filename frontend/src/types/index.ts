@@ -40,9 +40,25 @@ export interface TicketSuporte {
   id_tecnico: number | null;
 }
 
-// --- CORREÇÕES AQUI ---
+export interface Usuario {
+  usuario_id: number;
+  nome_completo: string;
+  matricula: string;
+  login: string;
+  perfil_id: number | null;
+  status_usuario: "Ativo" | "Inativo" | "Bloqueado";
+}
+
+// <<< --- NOVA INTERFACE ADICIONADA --- >>>
+export interface PerfilAcesso {
+  perfil_id: number;
+  nome_perfil: string;
+  // Adicione outras colunas de permissão se houver
+}
+// <<< --- FIM DA NOVA INTERFACE --- >>>
+
 export interface Equipamento {
-  id: number | string; // Corrigido: Aceita ID numérico ou Serial (string)
+  id: number | string;
   name: string;
   type: string;
   model: string;
@@ -52,18 +68,10 @@ export interface Equipamento {
   location: string;
   installDate: string | null;
   lastMaintenance: string | null;
-  // Campos extras do backend (opcionais)
   fabricante?: string;
   mac_adress?: string;
   ip_gerenciado?: string;
   firmware?: string;
-}
-// --- FIM DAS CORREÇÕES ---
-
-export interface Usuario {
-  usuario_id: number;
-  nome_completo: string;
-  perfil_id: number | null;
 }
 
 export interface Relatorio {

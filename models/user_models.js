@@ -35,9 +35,53 @@ async function GetAllUsers() {
     return rows;
 }
 
+
+
+async function FindUserById(usuario_id) {
+    const [rows] = await db.query(
+        'SELECT usuario_id, nome_completo, matricula, login, perfil_id, status_usuario FROM usuarios WHERE usuario_id = ?',
+        [usuario_id]
+    );
+    return rows[0];
+}
+
+
+async function GetAllUsersForAdmin() {
+    const [rows] = await db.query(
+        `SELECT usuario_id, nome_completo, matricula, login, perfil_id, status_usuario 
+         FROM usuarios 
+         ORDER BY nome_completo ASC`
+    );
+    return rows;
+}
+
+
+async function UpdateUser(usuario_id, nome_completo, matricula, login, perfil_id, status_usuario) {
+    const [result] = await db.query(
+        `UPDATE usuarios 
+         SET nome_completo = ?, matricula = ?, login = ?, perfil_id = ?, status_usuario = ?
+         WHERE usuario_id = ?`,
+        [nome_completo, matricula, login, perfil_id, status_usuario, usuario_id]
+    );
+    return result;
+}
+
+
+async function DeleteUser(usuario_id) {
+    const [result] = await db.query(
+        "UPDATE usuarios SET status_usuario = 'Inativo' WHERE usuario_id = ?",
+        [usuario_id]
+    );
+    return result;
+}
+
 module.exports = {
     InsertUser,
     FindUserByLogin,
     FindUserByMatricula,
-    GetAllUsers 
+    GetAllUsers,
+    FindUserById,
+    GetAllUsersForAdmin, 
+    UpdateUser, 
+    DeleteUser  
 };

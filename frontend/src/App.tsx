@@ -12,10 +12,9 @@ import Plans from "./components/Plans";
 import Equipment from "./components/Equipment";
 import Support from "./components/Support";
 import Reports from "./components/Reports";
+import UserManagement from "./components/UserManagement"; 
 
-// Adiciona o novo tipo de página
-type Pagina = "dashboard" | "clientes" | "planos" | "equipamentos" | "suporte" | "relatorios";
-// Adiciona a nova visualização de autenticação
+type Pagina = "dashboard" | "clientes" | "planos" | "equipamentos" | "suporte" | "relatorios" | "usuarios";
 type AuthView = 'login' | 'register' | 'publicTicket';
 
 function App() {
@@ -51,6 +50,8 @@ function App() {
         return <Support />;
       case "relatorios":
         return <Reports />;
+      case "usuarios":
+        return <UserManagement />;
       default:
         return <Dashboard />;
     }
@@ -91,8 +92,7 @@ function App() {
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar
         abaAtiva={abaAtiva}
-        // <<< --- CORREÇÃO AQUI --- >>>
-        // Passa uma função que aceita 'string' (como o Sidebar espera)
+        // Passa a função que aceita 'string' (como o Sidebar espera)
         definirAbaAtiva={(tab: string) => definirAbaAtiva(tab as Pagina)}
         recolhida={barraLateralRecolhida}
         definirRecolhida={definirBarraLateralRecolhida}
@@ -102,9 +102,9 @@ function App() {
           barraLateralRecolhida ? "ml-16" : "ml-64"
         }`}
       >
-        {/* <<< --- CORREÇÃO AQUI --- >>> */}
-        {/* Removemos a prop 'onLogout' por enquanto, já que o Header não a aceita */}
-        <Header /> 
+        {/* --- CORREÇÃO AQUI --- */}
+        {/* Removida a prop 'onLogout' que estava causando o erro */}
+        <Header />
         <main className="flex-1 p-6 overflow-auto">{renderizarConteudo()}</main>
       </div>
     </div>
