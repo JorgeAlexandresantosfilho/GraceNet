@@ -2,7 +2,7 @@ const user_models = require('../models/user_models');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'SEU_SEGREDO_SUPER_SECRETO_PARA_PRODUCAO';
+const JWT_SECRET = process.env.JWT_SECRET || 'BRUCE_WAYNE';
 
 async function RegisterUser(req, res) {
     const { nome_completo, matricula, login, senha, perfil_id } = req.body;
@@ -21,7 +21,7 @@ async function RegisterUser(req, res) {
         
         const result = await user_models.InsertUser(nome_completo, matricula, login, senha, perfil_id);
         
-   
+        
         try {
             await db.query("SELECT senha_hash FROM usuarios LIMIT 1");
         } catch (e) {
@@ -29,7 +29,7 @@ async function RegisterUser(req, res) {
                 await db.query("ALTER TABLE usuarios ADD COLUMN senha_hash VARCHAR(255) NOT NULL;");
             }
         }
-        
+      
          try {
             await db.query("SELECT status_usuario FROM usuarios LIMIT 1");
         } catch (e) {
@@ -37,7 +37,7 @@ async function RegisterUser(req, res) {
                 await db.query("ALTER TABLE usuarios ADD COLUMN status_usuario ENUM('Ativo', 'Inativo', 'Bloqueado') DEFAULT 'Ativo' NOT NULL;");
             }
         }
-        
+       
          try {
             await db.query("SELECT senha FROM usuarios LIMIT 1");
             await db.query("ALTER TABLE usuarios DROP COLUMN senha;");
@@ -88,11 +88,10 @@ async function LoginUser(req, res) {
     }
 }
 
-
 async function GetAllUsers(req, res) {
     try {
         const users = await user_models.GetAllUsers();
-        return res.status(200).json(users); 
+        return res.status(200).json(users);
     } catch (error) {
         console.error("ERRO AO BUSCAR TODOS OS USUÁRIOS:", error);
         return res.status(500).json({ msg: 'Erro ao buscar usuários.', error: error.message });

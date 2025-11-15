@@ -20,7 +20,6 @@ async function GetOS(codigo_os) {
 }
 
 async function GetAllOS() {
-
     const [rows] = await db.query(
        `SELECT s.os_id, s.titulo, s.status, s.prioridade, s.id_cliente, s.id_tecnico,
                s.descricao_problema, s.inicio_desejado, s.conclusao_desejada,

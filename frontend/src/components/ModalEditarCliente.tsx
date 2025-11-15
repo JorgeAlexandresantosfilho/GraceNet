@@ -1,32 +1,33 @@
 import { useState, useEffect } from 'react';
-// <<< --- CORREÇÃO AQUI --- >>>
-// Garante que estamos importando os tipos e funções corretos
+// Importa o tipo e as funções corretas (de CLIENTE)
 import type { Cliente } from '../types';
 import { getClienteById, updateCliente } from '../services/api';
 
 interface ModalEditarClienteProps {
   clienteId: number;
   onClose: () => void;
-  // <<< --- CORREÇÃO AQUI --- >>>
-  // Garante que o onSave espera um 'Cliente', não um 'Plano'
   onSave: (clienteAtualizado: Partial<Cliente>) => void;
 }
 
 const ModalEditarCliente: React.FC<ModalEditarClienteProps> = ({ clienteId, onClose, onSave }) => {
+  // Estado para o formulário
   const [formData, setFormData] = useState<Partial<Cliente>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saveLoading, setSaveLoading] = useState(false);
 
+  // 1. Busca os dados do CLIENTE quando o modal abre
   useEffect(() => {
     const carregarDadosCliente = async () => {
       setLoading(true);
       setError(null);
       try {
         const data = await getClienteById(clienteId);
-        setFormData(data);
+        setFormData(data); // Preenche o formulário com os dados recebidos
       } catch (err: any) {
-        setError(err.message || "Falha ao carregar dados do cliente.");
+        // --- CORREÇÃO AQUI ---
+        // A mensagem de erro agora é sobre "cliente"
+        setError(err.message || "Falha ao carregar dados do CLIENTE.");
         console.error("Erro ao carregar cliente:", err);
       } finally {
         setLoading(false);
@@ -37,6 +38,7 @@ const ModalEditarCliente: React.FC<ModalEditarClienteProps> = ({ clienteId, onCl
     }
   }, [clienteId]);
 
+  // 2. Função para lidar com mudanças no formulário
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -45,6 +47,7 @@ const ModalEditarCliente: React.FC<ModalEditarClienteProps> = ({ clienteId, onCl
     }));
   };
 
+  // 3. Função para salvar (chama a API de CLIENTE)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData) return;
@@ -53,7 +56,7 @@ const ModalEditarCliente: React.FC<ModalEditarClienteProps> = ({ clienteId, onCl
     setError(null);
     try {
       await updateCliente(clienteId, formData);
-      onSave(formData);
+      onSave(formData); // Avisa o componente pai com os dados atualizados
     } catch (err: any) {
       setError(err.message || "Falha ao salvar. Tente novamente.");
       console.error("Erro ao salvar cliente:", err);
@@ -61,6 +64,8 @@ const ModalEditarCliente: React.FC<ModalEditarClienteProps> = ({ clienteId, onCl
       setSaveLoading(false);
     }
   };
+
+  // --- Renderização do Modal ---
 
   if (loading) {
     return (
@@ -70,6 +75,8 @@ const ModalEditarCliente: React.FC<ModalEditarClienteProps> = ({ clienteId, onCl
     );
   }
 
+  // --- CORREÇÃO AQUI ---
+  // Mostra a mensagem de erro (agora correta)
   if (error && !formData.id) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -171,6 +178,4 @@ const ModalEditarCliente: React.FC<ModalEditarClienteProps> = ({ clienteId, onCl
   );
 };
 
-// <<< --- CORREÇÃO AQUI --- >>>
-// Adiciona o export default que estava faltando
 export default ModalEditarCliente;
