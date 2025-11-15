@@ -1,11 +1,9 @@
-import { useState, useEffect } from "react";
-// Importa as novas telas e funções de auth
+import { useState } from "react";
 import Register from "./components/auth/Register";
 import PublicTicketForm from "./components/auth/PublicTicketForm";
 import Login from "./components/auth/Login";
-// --- FUNÇÕES DE AUTH ATUALIZADAS ---
-import { isUserLoggedIn, logoutUser, getCurrentUser } from "./services/api"; 
-import type { Usuario } from "./types"; // Importa o tipo Usuario
+import { isUserLoggedIn, logoutUser, getCurrentUser } from "./services/api";
+import type { Usuario } from "./types";
 
 import CustomerDetails from "./components/CustomerDetails";
 import Header from "./components/Header";
@@ -16,44 +14,42 @@ import Plans from "./components/Plans";
 import Equipment from "./components/Equipment";
 import Support from "./components/Support";
 import Reports from "./components/Reports";
-import UserManagement from "./components/UserManagement"; 
+import UserManagement from "./components/UserManagement";
+import MeuPerfil from "./components/MeuPerfil";
 
-type Pagina = "dashboard" | "clientes" | "planos" | "equipamentos" | "suporte" | "relatorios" | "usuarios";
+type Pagina = 
+  "dashboard" | "clientes" | "planos" | "equipamentos" | 
+  "suporte" | "relatorios" | "usuarios" | "meuperfil";
+
 type AuthView = 'login' | 'register' | 'publicTicket';
 
 function App() {
-  // --- ESTADOS GLOBAIS ---
-  // Inicia checando se o usuário já está logado
-  const [authData, setAuthData] = useState(isUserLoggedIn()); 
+  const [authData, setAuthData] = useState(isUserLoggedIn());
   const [abaAtiva, definirAbaAtiva] = useState<Pagina>("dashboard");
-  
-  // Estados de UI
+
   const [barraLateralRecolhida, definirBarraLateralRecolhida] = useState(false);
   const [idClienteSelecionado, definirIdClienteSelecionado] = useState<number | null>(null);
-  const [authView, setAuthView] = useState<AuthView>('login');
-  
-  // --- FUNÇÕES DE NAVEGAÇÃO E AUTENTICAÇÃO ---
+  const [authView, setAuthView] = useState<AuthView>("login");
+
   const handleLogin = () => {
-    const usuarioLogado = getCurrentUser(); // Pega os dados que o loginUser salvou
-    setAuthData({ auth: true, user: usuarioLogado });
-    setAuthView('login'); // Reseta a tela de auth para o padrão
+    const usuario = getCurrentUser();
+    setAuthData({ auth: true, user: usuario });
   };
-  
+
   const handleLogout = () => {
-    logoutUser(); // Limpa o sessionStorage
+    logoutUser();
     setAuthData({ auth: false, user: null });
-    setAuthView('login'); // Volta para a tela de login
+    setAuthView("login");
   };
 
   const renderizarConteudo = () => {
-    if (idClienteSelecionado) {
+    if (idClienteSelecionado)
       return (
-        <CustomerDetails 
+        <CustomerDetails
           idCliente={idClienteSelecionado}
           onBack={() => definirIdClienteSelecionado(null)}
         />
       );
-    }
 
     switch (abaAtiva) {
       case "dashboard":
@@ -70,6 +66,8 @@ function App() {
         return <Reports />;
       case "usuarios":
         return <UserManagement />;
+      case "meuperfil":
+        return <MeuPerfil />;
       default:
         return <Dashboard />;
     }
@@ -77,35 +75,32 @@ function App() {
 
   const renderizarAutenticacao = () => {
     switch (authView) {
-      case 'login':
+      case "login":
         return (
-          <Login 
-            onLogin={handleLogin} // Passa a função de login
-            onNavigateToRegister={() => setAuthView('register')}
-            onNavigateToPublicTicket={() => setAuthView('publicTicket')} 
+          <Login
+            onLogin={handleLogin}
+            onNavigateToRegister={() => setAuthView("register")}
+            onNavigateToPublicTicket={() => setAuthView("publicTicket")}
           />
         );
-      case 'register':
-         return (
-           <Register
-             onNavigateToLogin={() => setAuthView('login')}
-           />
-         );
-      case 'publicTicket':
-          return (
-            <PublicTicketForm
-              onNavigateToLogin={() => setAuthView('login')}
-            />
-          );
+      case "register":
+        return (
+          <Register
+            onNavigateToLogin={() => setAuthView("login")}
+          />
+        );
+      case "publicTicket":
+        return (
+          <PublicTicketForm
+            onNavigateToLogin={() => setAuthView("login")}
+          />
+        );
       default:
-        return <div>Erro de navegação</div>;
+        return <div>Erro</div>;
     }
   };
 
-  // --- RENDERIZAÇÃO PRINCIPAL ---
-  if (!authData.auth) { // Se 'auth' for false
-    return renderizarAutenticacao();
-  }
+  if (!authData.auth) return renderizarAutenticacao();
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -115,18 +110,19 @@ function App() {
         recolhida={barraLateralRecolhida}
         definirRecolhida={definirBarraLateralRecolhida}
       />
+
       <div
         className={`flex-1 flex flex-col transition-all duration-300 ${
           barraLateralRecolhida ? "ml-16" : "ml-64"
         }`}
       >
-        {/* --- CORREÇÃO AQUI --- */}
-        {/* Agora passamos os dados do usuário e a função de logout para o Header */}
-        <Header 
-          currentUser={authData.user} // Passa o objeto do usuário
-          onLogout={handleLogout}      // Passa a função de logout
+        <Header
+          currentUser={authData.user}
+          onLogout={handleLogout}
+          onOpenProfile={() => definirAbaAtiva("meuperfil")}
         />
-        <main className="flex-1 p-6 overflow-auto">{renderizarConteudo()}</main>
+
+        <main className="flex-1 p-6">{renderizarConteudo()}</main>
       </div>
     </div>
   );

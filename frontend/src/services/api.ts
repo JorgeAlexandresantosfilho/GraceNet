@@ -410,21 +410,24 @@ export const registerUser = async (dadosCadastro: any) => {
 export const loginUser = async (login: string, senha: string) => {
     try {
         const response = await apiClient.post('/auth/login', { login, senha });
+
         const { token, user } = response.data;
-        if (token) {
-            // <<< --- CORREÇÃO DE SEGURANÇA --- >>>
-            // Troca localStorage por sessionStorage
-            sessionStorage.setItem('authToken', token);
-            sessionStorage.setItem('currentUser', JSON.stringify(user));
-            return response.data;
-        } else {
-            throw new Error("Token não recebido.");
+
+        if (!token || !user) {
+            throw new Error("Resposta inválida do servidor.");
         }
+
+        // 🔥 Buscar usuário COMPLETO (garante nome, matricula, etc)
+        const userFull = await apiClient.get(`/auth/users/${user.id}`);
+
+        // Salva corretamente
+        sessionStorage.setItem('authToken', token);
+        sessionStorage.setItem('currentUser', JSON.stringify(userFull.data));
+
+        return { token, user: userFull.data };
+
     } catch (error: any) {
-        console.error('Erro ao fazer login:', error);
-        if (axios.isAxiosError(error) && error.response) {
-            throw new Error(error.response.data.msg || "Falha no login.");
-        }
+        console.error("Erro ao fazer login:", error);
         throw new Error("Falha no login.");
     }
 };
