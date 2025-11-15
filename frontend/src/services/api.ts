@@ -417,17 +417,19 @@ export const loginUser = async (login: string, senha: string) => {
             throw new Error("Resposta inválida do servidor.");
         }
 
-        // 🔥 Buscar usuário COMPLETO (garante nome, matricula, etc)
-        const userFull = await apiClient.get(`/auth/users/${user.id}`);
-
-        // Salva corretamente
+        // 🔥 NÃO buscar mais userFull — já vem completo do backend
         sessionStorage.setItem('authToken', token);
-        sessionStorage.setItem('currentUser', JSON.stringify(userFull.data));
+        sessionStorage.setItem('currentUser', JSON.stringify(user));
 
-        return { token, user: userFull.data };
+        return { token, user };
 
     } catch (error: any) {
         console.error("Erro ao fazer login:", error);
+
+        if (axios.isAxiosError(error) && error.response?.data?.msg) {
+            throw new Error(error.response.data.msg);
+        }
+
         throw new Error("Falha no login.");
     }
 };

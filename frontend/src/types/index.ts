@@ -47,6 +47,11 @@ export interface Usuario {
   login: string;
   perfil_id: number | null;
   status_usuario: "Ativo" | "Inativo" | "Bloqueado";
+
+  email?: string;
+  telefone?: string;
+  foto_perfil?: string | null;
+  ultimo_login?: string | null;
 }
 
 // <<< --- INTERFACE ADICIONADA --- >>>
