@@ -17,7 +17,4 @@ Para executar o front-end
 utilize npm install para instalar as dependências e npm run dev para rodar ele, logo após http será fornecido no terminal.
 
 
-Backend e integração front (até o momento) 
-feito por [Jorge Alexandre], front-end desenvolvido por @gusmariz ==> https://github.com/gusmariz
-
 Email: jorgealexandrefilho@proton.me
