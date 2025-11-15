@@ -1,25 +1,23 @@
 import { useState, useEffect } from 'react';
-import { Plus, Router, Monitor, Settings, Edit, Trash2 } from 'lucide-react';
-// Importa TODAS as funções da API necessárias
-import { getEquipamentos, deleteEquipamento, createEquipamento, updateEquipamento, getEquipamentoBySerial } from '../services/api';
+import { Plus, Router, Monitor, Settings, Edit, Trash2, Search } from 'lucide-react';
+import { getEquipamentos, deleteEquipamento } from '../services/api';
 import type { Equipamento } from '../types';
-// Importa os DOIS modais
+// Importa os modais
 import ModalAdicionarEquipamento from './ModalAdicionarEquipamento';
-import ModalEditarEquipamento from './ModalEditarEquipamento';
+// <<< --- CORREÇÃO AQUI --- >>>
+// Removemos as chaves {} para bater com o 'export default' do modal
+import ModalEditarEquipamento from './ModalEditarEquipamento'; 
 
 const Equipment = () => {
   const [equipamentos, setEquipamentos] = useState<Equipamento[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filtro, setFiltro] = useState('all');
-
-  // --- Estados para Modais ---
+  const [busca, setBusca] = useState("");
   const [isModalAdicionarAberto, setIsModalAdicionarAberto] = useState(false);
   const [isModalEditarAberto, setIsModalEditarAberto] = useState(false);
-  // Armazena o SERIAL NUMBER para edição
   const [equipamentoSelecionadoSerial, setEquipamentoSelecionadoSerial] = useState<string | null>(null);
 
-  // Hook para carregar dados da API
   useEffect(() => {
     carregarEquipamentos();
   }, []);
@@ -58,8 +56,17 @@ const Equipment = () => {
   };
 
   const filteredEquipment = equipamentos.filter(item => {
-    if (filtro === 'all') return true;
-    return item.status === filtro;
+    const statusMatch = filtro === 'all' || item.status === filtro;
+    if (!statusMatch) return false;
+    const buscaLower = busca.toLowerCase();
+    const nome = item.name || '';
+    const modelo = item.model || '';
+    const serial = item.serialNumber || '';
+    const buscaMatch = 
+        nome.toLowerCase().includes(buscaLower) ||
+        modelo.toLowerCase().includes(buscaLower) ||
+        serial.toLowerCase().includes(buscaLower);
+    return buscaMatch;
   });
 
   const stats = [
@@ -84,13 +91,12 @@ const Equipment = () => {
     }
   };
 
-  // --- Funções para controlar os Modais ---
    const handleAbrirModalAdicionar = () => {
       setIsModalAdicionarAberto(true);
    };
 
    const handleAbrirModalEditar = (serialNumber: string) => {
-      setEquipamentoSelecionadoSerial(serialNumber); // Guarda o serial
+      setEquipamentoSelecionadoSerial(serialNumber);
       setIsModalEditarAberto(true);
    };
 
@@ -101,19 +107,15 @@ const Equipment = () => {
    const handleFecharModalAdicionar = () => setIsModalAdicionarAberto(false);
    const handleFecharModalEditar = () => { setIsModalEditarAberto(false); setEquipamentoSelecionadoSerial(null); };
 
-   // Callback quando o modal Adicionar salva
    const handleSalvarAdicao = (novoEquip: Equipamento) => {
-       setEquipamentos(prev => [novoEquip, ...prev]); // Adiciona no início
+       setEquipamentos(prev => [novoEquip, ...prev]);
        handleFecharModalAdicionar();
    };
 
-   // Callback quando o modal Editar salva
    const handleSalvarEdicao = (equipAtualizado: Equipamento) => {
-       // Atualiza o item na lista pelo serialNumber
        setEquipamentos(prev => prev.map(e => e.serialNumber === equipAtualizado.serialNumber ? equipAtualizado : e));
        handleFecharModalEditar();
    };
-
 
   if (loading) {
     return <div className="p-6 text-center">Carregando equipamentos...</div>;
@@ -134,7 +136,7 @@ const Equipment = () => {
           <p className="text-gray-600 mt-1">Gerencie todos os equipamentos de rede</p>
         </div>
         <button
-            onClick={handleAbrirModalAdicionar} // Chama a função correta
+            onClick={handleAbrirModalAdicionar}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
           <Plus className="w-4 h-4" />
           <span>Novo Equipamento</span>
@@ -150,33 +152,44 @@ const Equipment = () => {
         ))}
       </div>
 
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setFiltro('all')}
-            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-              filtro === 'all' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Todos
-          </button>
-          {['Em uso', 'Disponível', 'Manutenção', 'Defeito'].map(status => (
-             <button
-                key={status}
-                onClick={() => setFiltro(status)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  filtro === status ? `${getStatusColor(status).replace('text-', 'bg-').replace('-800', '-100').replace('-1000', '-700')} ${getStatusColor(status).replace('bg-', 'text-')}` : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-               {status}
-             </button>
-          ))}
-        </div>
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col sm:flex-row gap-4">
+         <div className="relative flex-1">
+            <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Buscar por nome, modelo ou S/N..."
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 
+              focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setFiltro('all')}
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                filtro === 'all' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Todos
+            </button>
+            {['Em uso', 'Disponível', 'Manutenção', 'Defeito'].map(status => (
+              <button
+                  key={status}
+                  onClick={() => setFiltro(status)}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    filtro === status ? `${getStatusColor(status).replace('text-', 'bg-').replace('-800', '-100').replace('-1000', '-700')} ${getStatusColor(status).replace('bg-', 'text-')}` : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                {status}
+              </button>
+            ))}
+          </div>
       </div>
 
       {filteredEquipment.length === 0 && !loading && (
         <div className="text-center py-10 text-gray-500">
-          Nenhum equipamento encontrado{filtro !== 'all' ? ' com o filtro aplicado' : ''}.
+          Nenhum equipamento encontrado{filtro !== 'all' || busca ? ' com os filtros aplicados' : ''}.
         </div>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -207,13 +220,13 @@ const Equipment = () => {
               <div className="mt-4 pt-4 border-t border-gray-200">
                 <div className="flex space-x-2">
                   <button
-                     onClick={() => handleAbrirModalEditar(item.serialNumber)} // Chama a função correta
+                     onClick={() => handleAbrirModalEditar(item.serialNumber)}
                      className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-1">
                      <Edit className="w-4 h-4" />
                      <span>Editar</span>
                   </button>
                    <button
-                     onClick={() => handleAbrirDetalhes(item.serialNumber)} // Chama a função correta
+                     onClick={() => handleAbrirDetalhes(item.serialNumber)}
                      className="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
                      Detalhes
                    </button>
@@ -230,7 +243,6 @@ const Equipment = () => {
         })}
       </div>
 
-       {/* --- Renderiza os Modais --- */}
        {isModalAdicionarAberto && (
             <ModalAdicionarEquipamento
                 onClose={handleFecharModalAdicionar}
@@ -239,7 +251,7 @@ const Equipment = () => {
        )}
        {isModalEditarAberto && equipamentoSelecionadoSerial && (
             <ModalEditarEquipamento
-                serialNumber={equipamentoSelecionadoSerial} // Passa o serial number
+                serialNumber={equipamentoSelecionadoSerial} 
                 onClose={handleFecharModalEditar}
                 onSave={handleSalvarEdicao}
             />

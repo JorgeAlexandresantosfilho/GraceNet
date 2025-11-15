@@ -1,14 +1,12 @@
 import axios from 'axios';
-// Adiciona 'Usuario' aos tipos
 import type { Cliente, Plano, Equipamento, TicketSuporte, Usuario } from '../types';
 
-// Configura a URL base do seu backend.
 const apiClient = axios.create({
   baseURL: 'http://localhost:3000',
 });
 
 // ===================================================================
-// FUNÇÕES DE CLIENTE
+// FUNÇÕES DE CLIENTE (Sem alterações)
 // ===================================================================
 const mapBackendClienteToFrontend = (backendCliente: any): Cliente => {
   return {
@@ -192,6 +190,7 @@ export const deletePlano = async (id: number): Promise<void> => {
 // ===================================================================
 // FUNÇÕES DE EQUIPAMENTOS
 // ===================================================================
+// --- CORREÇÃO AQUI ---
 const mapBackendEquipamentoToFrontend = (backendEquip: any): Equipamento => {
   return {
     id: backendEquip.id_equipamento || backendEquip.numero_serie,
@@ -204,7 +203,45 @@ const mapBackendEquipamentoToFrontend = (backendEquip: any): Equipamento => {
     customer: null,
     installDate: null,
     lastMaintenance: null,
+    // --- CAMPOS EXTRAS ADICIONADOS ---
+    // Agora o types.ts aceita estes campos
+    fabricante: backendEquip.fabricante || '',
+    mac_adress: backendEquip.mac_adress || '',
+    ip_gerenciado: backendEquip.ip_gerenciado || '',
+    firmware: backendEquip.firmware || '',
   };
+};
+// --- CORREÇÃO AQUI ---
+// Este tipo precisa ser parcial e mais simples para o mapFrontend
+type EquipamentoPayloadBackend = {
+    tipo?: string;
+    modelo?: string;
+    fabricante?: string;
+    numero_serie?: string;
+    mac_adress?: string;
+    ip_gerenciado?: string;
+    firmware?: string;
+    status?: string;
+    localizacao?: string;
+};
+// Este mapeador traduz os dados do formulário do frontend para o backend
+const mapFrontendEquipamentoToBackend = (equip: Partial<Equipamento>): Partial<EquipamentoPayloadBackend> => {
+    const backendData: Partial<EquipamentoPayloadBackend> = {};
+    
+    // Mapeia os campos da interface 'Equipamento'
+    if (equip.type !== undefined) backendData.tipo = equip.type;
+    if (equip.model !== undefined) backendData.modelo = equip.model;
+    if (equip.serialNumber !== undefined) backendData.numero_serie = equip.serialNumber;
+    if (equip.status !== undefined) backendData.status = equip.status;
+    if (equip.location !== undefined) backendData.localizacao = equip.location;
+
+    // Mapeia os campos extras que o formulário enviará
+    if (equip.fabricante !== undefined) backendData.fabricante = equip.fabricante;
+    if (equip.mac_adress !== undefined) backendData.mac_adress = equip.mac_adress;
+    if (equip.ip_gerenciado !== undefined) backendData.ip_gerenciado = equip.ip_gerenciado;
+    if (equip.firmware !== undefined) backendData.firmware = equip.firmware;
+
+    return backendData;
 };
 export const getEquipamentos = async (): Promise<Equipamento[]> => {
   try {
@@ -234,6 +271,7 @@ export const getEquipamentoBySerial = async (serialNumber: string): Promise<Equi
 };
 export const createEquipamento = async (dadosEquip: any): Promise<Equipamento> => {
   try {
+    // 'dadosEquip' já está vindo do modal no formato do backend (ex: numero_serie)
     const response = await apiClient.post('/Equip', dadosEquip);
      if (response.data.result?.affectedRows > 0 && dadosEquip.numero_serie) {
        try {
@@ -254,10 +292,20 @@ export const createEquipamento = async (dadosEquip: any): Promise<Equipamento> =
     throw new Error("Falha ao criar o equipamento.");
   }
 };
+// --- CORREÇÃO AQUI ---
+// A função 'updateEquipamento' agora usa o mapeador
 export const updateEquipamento = async (serialNumber: string, dadosEquip: Partial<Equipamento>): Promise<Partial<Equipamento>> => {
   try {
-    // A função mapFrontendEquipamentoToBackend não está definida aqui, vamos simplificar
-    await apiClient.put(`/Equip/${serialNumber}`, dadosEquip);
+    // 1. Traduz os dados do formulário (Partial<Equipamento>) para o formato do backend
+    const payload = mapFrontendEquipamentoToBackend(dadosEquip);
+    // 2. Remove campos indefinidos
+    Object.keys(payload).forEach(key => (payload as any)[key] === undefined && delete (payload as any)[key]);
+    
+    // 3. Envia o payload corrigido
+    await apiClient.put(`/Equip/${serialNumber}`, payload);
+    
+    // 4. Retorna os dados do formulário para atualizar a UI localmente
+    // Opcional: poderia buscar novamente para ter 100% de certeza
     return dadosEquip;
   } catch (error) {
     console.error(`Erro ao atualizar equipamento ${serialNumber}:`, error);
@@ -310,7 +358,7 @@ const mapBackendSuporteToFrontend = (backendTicket: any): TicketSuporte => {
         criado: formatarDataExibicao(backendTicket.inicio_desejado),
         atualizado: formatarDataExibicao(backendTicket.conclusao_desejada), 
         inicio_desejado_input: formatarDataInput(backendTicket.inicio_desejado),
-        id_tecnico: backendTicket.id_tecnico || null, // <<< --- CAMPO ADICIONADO --- >>>
+        id_tecnico: backendTicket.id_tecnico || null,
     };
 };
 export const getSuporteTickets = async (): Promise<TicketSuporte[]> => {
@@ -405,13 +453,11 @@ export const logoutUser = () => {
 };
 
 // ===================================================================
-// --- FUNÇÃO NOVA PARA BUSCAR USUÁRIOS/TÉCNICOS ---
+// FUNÇÕES DE USUÁRIOS (TÉCNICOS)
 // ===================================================================
 export const getUsuarios = async (): Promise<Usuario[]> => {
     try {
-        // Rota: GET /auth/users
         const response = await apiClient.get('/auth/users');
-        // O controller GetAllUsers retorna o array direto
         return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
         console.error('Erro ao buscar usuários:', error);

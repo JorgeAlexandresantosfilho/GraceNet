@@ -8,8 +8,8 @@ interface ModalEditarPlanoProps {
   onSave: (planoAtualizado: Plano) => void;
 }
 
-// <<< --- CORREÇÃO AQUI --- >>>
-// Removemos o 'React.FC' e definimos como função normal
+// <<< --- MUDANÇA DE ESTRATÉGIA --- >>>
+// Exporta como 'const' (nomeada) para evitar erros de 'default'
 export const ModalEditarPlano = ({ plano, onClose, onSave }: ModalEditarPlanoProps) => {
   const [formData, setFormData] = useState<Plano>(plano);
   const [loading, setLoading] = useState(false);
@@ -21,16 +21,18 @@ export const ModalEditarPlano = ({ plano, onClose, onSave }: ModalEditarPlanoPro
 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
+    // <<< --- CORREÇÃO AQUI --- >>>
+    // Adicionado 'e.target.' antes de 'type'
     let valorFinal: string | number = value;
-
-    if (name === 'preco' && type === 'number') {
+    if (name === 'preco' && e.target.type === 'number') {
        const parsedValue = parseFloat(value);
        valorFinal = isNaN(parsedValue) ? 0 : parsedValue;
     }
     if (name === 'status' && (value === 'Ativo' || value === 'Inativo')) {
         valorFinal = value;
     }
+    // <<< --- FIM DA CORREÇÃO --- >>>
 
     setFormData(prev => ({
       ...prev,
@@ -113,4 +115,4 @@ export const ModalEditarPlano = ({ plano, onClose, onSave }: ModalEditarPlanoPro
   );
 };
 
-// <<< --- NÃO TEM MAIS EXPORT DEFAULT AQUI --- >>>
+// Não há 'export default'
