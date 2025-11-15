@@ -49,13 +49,13 @@ export interface Usuario {
   status_usuario: "Ativo" | "Inativo" | "Bloqueado";
 }
 
-// <<< --- NOVA INTERFACE ADICIONADA --- >>>
+// <<< --- INTERFACE ADICIONADA --- >>>
+// (Caso ela estivesse faltando)
 export interface PerfilAcesso {
   perfil_id: number;
   nome_perfil: string;
-  // Adicione outras colunas de permissão se houver
 }
-// <<< --- FIM DA NOVA INTERFACE --- >>>
+// <<< --- FIM DA ADIÇÃO --- >>>
 
 export interface Equipamento {
   id: number | string;

@@ -6,7 +6,7 @@ const apiClient = axios.create({
 });
 
 // ===================================================================
-// FUNÇÕES DE CLIENTE
+// FUNÇÕES DE CLIENTE (Sem alterações)
 // ===================================================================
 const mapBackendClienteToFrontend = (backendCliente: any): Cliente => {
   return {
@@ -412,8 +412,10 @@ export const loginUser = async (login: string, senha: string) => {
         const response = await apiClient.post('/auth/login', { login, senha });
         const { token, user } = response.data;
         if (token) {
-            localStorage.setItem('authToken', token);
-            localStorage.setItem('currentUser', JSON.stringify(user));
+            // <<< --- CORREÇÃO DE SEGURANÇA --- >>>
+            // Troca localStorage por sessionStorage
+            sessionStorage.setItem('authToken', token);
+            sessionStorage.setItem('currentUser', JSON.stringify(user));
             return response.data;
         } else {
             throw new Error("Token não recebido.");
@@ -426,10 +428,45 @@ export const loginUser = async (login: string, senha: string) => {
         throw new Error("Falha no login.");
     }
 };
+
+// --- FUNÇÃO DE LOGOUT ATUALIZADA ---
 export const logoutUser = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('currentUser');
+    // Limpa sessionStorage
+    sessionStorage.removeItem('authToken');
+    sessionStorage.removeItem('currentUser');
 };
+
+// --- FUNÇÃO NOVA ADICIONADA ---
+// Pega os dados do usuário que foram salvos no login
+export const getCurrentUser = (): Usuario | null => {
+    const userString = sessionStorage.getItem('currentUser'); // <-- Usa sessionStorage
+    if (!userString) return null;
+    try {
+        // Converte a string JSON de volta para um objeto
+        return JSON.parse(userString);
+    } catch (e) {
+        console.error("Erro ao ler usuário do sessionStorage:", e);
+        logoutUser(); // Limpa se estiver corrompido
+        return null;
+    }
+};
+
+// --- FUNÇÃO NOVA ADICIONADA ---
+// Verifica se o token existe E se os dados do usuário existem
+export const isUserLoggedIn = (): { auth: boolean, user: Usuario | null } => {
+    const token = sessionStorage.getItem('authToken'); // <-- Usa sessionStorage
+    const user = getCurrentUser();
+    
+    if (token && user) {
+        // TODO: No futuro, você pode adicionar uma chamada de API
+        // para "validar" o token com o backend, mas por agora isso funciona.
+        return { auth: true, user: user };
+    } else {
+        logoutUser(); // Limpa qualquer lixo (ex: token sem usuário)
+        return { auth: false, user: null };
+    }
+};
+
 export const getUsuarios = async (): Promise<Usuario[]> => {
     try {
         const response = await apiClient.get('/auth/users');
@@ -490,11 +527,8 @@ export const deleteUser = async (id: number): Promise<any> => {
   }
 };
 
-// <<< --- FUNÇÃO NOVA ADICIONADA --- >>>
-/**
- * Busca todos os perfis de acesso
- * Rota: GET /perfis
- */
+// <<< --- CORREÇÃO AQUI --- >>>
+// Adiciona a função que estava faltando
 export const getPerfisAcesso = async (): Promise<PerfilAcesso[]> => {
     try {
         const response = await apiClient.get('/perfis');
@@ -505,7 +539,6 @@ export const getPerfisAcesso = async (): Promise<PerfilAcesso[]> => {
         throw new Error("Falha ao carregar lista de perfis.");
     }
 };
-// <<< --- FIM DA FUNÇÃO NOVA --- >>>
 
 // ===================================================================
 // FUNÇÃO DO DASHBOARD

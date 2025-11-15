@@ -1,9 +1,13 @@
-import { useState } from "react";
-// Importa as novas telas
+import { useState, useEffect } from "react";
+// Importa as novas telas e funções de auth
 import Register from "./components/auth/Register";
 import PublicTicketForm from "./components/auth/PublicTicketForm";
-import CustomerDetails from "./components/CustomerDetails";
 import Login from "./components/auth/Login";
+// --- FUNÇÕES DE AUTH ATUALIZADAS ---
+import { isUserLoggedIn, logoutUser, getCurrentUser } from "./services/api"; 
+import type { Usuario } from "./types"; // Importa o tipo Usuario
+
+import CustomerDetails from "./components/CustomerDetails";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./components/Dashboard";
@@ -18,14 +22,28 @@ type Pagina = "dashboard" | "clientes" | "planos" | "equipamentos" | "suporte" |
 type AuthView = 'login' | 'register' | 'publicTicket';
 
 function App() {
-  const [isAutenticado, setIsAutenticado] = useState(false);
+  // --- ESTADOS GLOBAIS ---
+  // Inicia checando se o usuário já está logado
+  const [authData, setAuthData] = useState(isUserLoggedIn()); 
   const [abaAtiva, definirAbaAtiva] = useState<Pagina>("dashboard");
-  const [barraLateralRecolhida, definirBarraLateralRecolhida] = useState(false);
-  const [idClienteSelecionado, definirIdClienteSelecionado] = useState<
-    number | null
-  >(null);
   
+  // Estados de UI
+  const [barraLateralRecolhida, definirBarraLateralRecolhida] = useState(false);
+  const [idClienteSelecionado, definirIdClienteSelecionado] = useState<number | null>(null);
   const [authView, setAuthView] = useState<AuthView>('login');
+  
+  // --- FUNÇÕES DE NAVEGAÇÃO E AUTENTICAÇÃO ---
+  const handleLogin = () => {
+    const usuarioLogado = getCurrentUser(); // Pega os dados que o loginUser salvou
+    setAuthData({ auth: true, user: usuarioLogado });
+    setAuthView('login'); // Reseta a tela de auth para o padrão
+  };
+  
+  const handleLogout = () => {
+    logoutUser(); // Limpa o sessionStorage
+    setAuthData({ auth: false, user: null });
+    setAuthView('login'); // Volta para a tela de login
+  };
 
   const renderizarConteudo = () => {
     if (idClienteSelecionado) {
@@ -62,7 +80,7 @@ function App() {
       case 'login':
         return (
           <Login 
-            onLogin={() => {setIsAutenticado(true)}}
+            onLogin={handleLogin} // Passa a função de login
             onNavigateToRegister={() => setAuthView('register')}
             onNavigateToPublicTicket={() => setAuthView('publicTicket')} 
           />
@@ -84,7 +102,8 @@ function App() {
     }
   };
 
-  if (!isAutenticado) {
+  // --- RENDERIZAÇÃO PRINCIPAL ---
+  if (!authData.auth) { // Se 'auth' for false
     return renderizarAutenticacao();
   }
 
@@ -92,7 +111,6 @@ function App() {
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar
         abaAtiva={abaAtiva}
-        // Passa a função que aceita 'string' (como o Sidebar espera)
         definirAbaAtiva={(tab: string) => definirAbaAtiva(tab as Pagina)}
         recolhida={barraLateralRecolhida}
         definirRecolhida={definirBarraLateralRecolhida}
@@ -103,8 +121,11 @@ function App() {
         }`}
       >
         {/* --- CORREÇÃO AQUI --- */}
-        {/* Removida a prop 'onLogout' que estava causando o erro */}
-        <Header />
+        {/* Agora passamos os dados do usuário e a função de logout para o Header */}
+        <Header 
+          currentUser={authData.user} // Passa o objeto do usuário
+          onLogout={handleLogout}      // Passa a função de logout
+        />
         <main className="flex-1 p-6 overflow-auto">{renderizarConteudo()}</main>
       </div>
     </div>
