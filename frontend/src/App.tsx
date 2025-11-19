@@ -17,8 +17,8 @@ import Reports from "./components/Reports";
 import UserManagement from "./components/UserManagement";
 import MeuPerfil from "./components/MeuPerfil";
 
-type Pagina = 
-  "dashboard" | "clientes" | "planos" | "equipamentos" | 
+type Pagina =
+  "dashboard" | "clientes" | "planos" | "equipamentos" |
   "suporte" | "relatorios" | "usuarios" | "meuperfil";
 
 type AuthView = 'login' | 'register' | 'publicTicket';
@@ -103,7 +103,7 @@ function App() {
   if (!authData.auth) return renderizarAutenticacao();
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex transition-colors duration-200">
       <Sidebar
         abaAtiva={abaAtiva}
         definirAbaAtiva={(tab: string) => definirAbaAtiva(tab as Pagina)}
@@ -112,9 +112,8 @@ function App() {
       />
 
       <div
-        className={`flex-1 flex flex-col transition-all duration-300 ${
-          barraLateralRecolhida ? "ml-16" : "ml-64"
-        }`}
+        className={`flex-1 flex flex-col transition-all duration-300 ${barraLateralRecolhida ? "ml-16" : "ml-64"
+          }`}
       >
         <Header
           currentUser={authData.user}

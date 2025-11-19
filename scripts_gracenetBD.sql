@@ -1,6 +1,26 @@
 CREATE DATABASE IF NOT EXISTS GraceNet;
-USE GraceNet;
+SELECT 
+    TABLE_NAME,
+    COLUMN_NAME,
+    COLUMN_TYPE,
+    IS_NULLABLE,
+    COLUMN_KEY,
+    COLUMN_DEFAULT,
+    EXTRA
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = 'GraceNet'
+ORDER BY TABLE_NAME, ORDINAL_POSITION;
 
+USE GraceNet;
+INSERT INTO perfis_acesso (perfil_id, nome_perfil) 
+VALUES 
+(1, 'Administrador'), 
+(2, 'Técnico');
+ALTER TABLE usuarios
+ADD COLUMN email VARCHAR(120) NULL,
+ADD COLUMN telefone VARCHAR(20) NULL,
+ADD COLUMN ultimo_login DATETIME NULL;
+ALTER TABLE usuarios DROP COLUMN ultimo_login;
 select * from usuarios;
 INSERT INTO tecnicos (nome, matricula, equipe, status)
 VALUES ('João Silva', 'TEC001', 'Equipe A', 'Ativo');
@@ -11,12 +31,16 @@ SELECT * FROM clientes;
 SELECT * FROM tecnicos;
 SELECT * FROM usuarios;
 SELECT * FROM equipamentos;
+show tables;
+
 ALTER TABLE suportes MODIFY COLUMN status VARCHAR(20);
 ALTER TABLE equipamentos MODIFY COLUMN status VARCHAR(20);
 INSERT INTO usuarios (matricula, nome_completo, login, senha_hash, perfil_id, status_usuario)
 VALUES 
 ('000001', 'Administrador do Sistema', 'admin', '$2b$10$C1uDnXb4OZ7M7oE1N9Q2.eJqRnUo3p9qM2K6bYh5f1v8lZz2mF.UK', NULL, 'Ativo');
 ALTER TABLE clientes MODIFY COLUMN id_plano INT NULL;
+ALTER TABLE usuarios ADD COLUMN foto_perfil LONGTEXT NULL;
+SHOW CREATE TABLE clientes\G;
 
 
 -- criar tabela principal de clientes

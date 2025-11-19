@@ -20,11 +20,11 @@ const StatCard: React.FC<{ titulo: string; valor: string | number; icone: React.
   const { bg, text } = colorClasses[cor] || {};
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-colors">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-600">{titulo}</p>
-          <div className="text-2xl font-bold text-gray-900 mt-1">
+          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{titulo}</p>
+          <div className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
             {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : valor}
           </div>
         </div>
@@ -65,7 +65,7 @@ const Dashboard = () => {
       try {
         setLoading(true);
         setError(null);
-        
+
         // 1. Busca todos os dados de uma vez
         const data = await getDashboardStats();
 
@@ -76,30 +76,30 @@ const Dashboard = () => {
         // 3. Processa o plano mais vendido
         let planoMaisVendido = "N/A";
         if (data.clientes.length > 0) {
-            const contagemPlanos = data.clientes.reduce((acc, cliente) => {
-                if (cliente.plano) { // Só conta se o cliente tiver um plano
-                    acc[cliente.plano] = (acc[cliente.plano] || 0) + 1;
-                }
-                return acc;
-            }, {} as Record<string, number>); // { "Fibra 100MB": 5, "Fibra 50MB": 2 }
+          const contagemPlanos = data.clientes.reduce((acc, cliente) => {
+            if (cliente.plano) { // Só conta se o cliente tiver um plano
+              acc[cliente.plano] = (acc[cliente.plano] || 0) + 1;
+            }
+            return acc;
+          }, {} as Record<string, number>); // { "Fibra 100MB": 5, "Fibra 50MB": 2 }
 
-            // Encontra o plano com a maior contagem
-            const [plano] = Object.entries(contagemPlanos)
-                                  .sort((a, b) => b[1] - a[1])[0] || ["N/A"];
-            planoMaisVendido = plano;
+          // Encontra o plano com a maior contagem
+          const [plano] = Object.entries(contagemPlanos)
+            .sort((a, b) => b[1] - a[1])[0] || ["N/A"];
+          planoMaisVendido = plano;
         }
-        
+
         // 4. Atualiza os estados
         setEstatisticas({
-            novosClientes: 90, // Fixo (mock)
-            clientesAtivos: clientesAtivos,
-            planoMaisVendido: planoMaisVendido,
-            chamadosAbertos: chamadosAbertos,
+          novosClientes: 90, // Fixo (mock)
+          clientesAtivos: clientesAtivos,
+          planoMaisVendido: planoMaisVendido,
+          chamadosAbertos: chamadosAbertos,
         });
-        
+
         // 5. Atualiza a lista de clientes recentes
         // (Já vem ordenado por ID DESC do backend)
-        setClientesRecentes(data.clientes.slice(0, 5)); 
+        setClientesRecentes(data.clientes.slice(0, 5));
 
       } catch (err: any) {
         setError(err.message || "Falha ao carregar dados do dashboard.");
@@ -108,20 +108,20 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
-    
+
     carregarDados();
   }, []); // Roda apenas uma vez
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-1">Visão geral</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">Visão geral</p>
       </div>
 
       {/* Mostra erro no topo se houver */}
       {error && (
-         <div className="p-3 bg-red-100 text-red-700 rounded-lg">{error}</div>
+        <div className="p-3 bg-red-100 text-red-700 rounded-lg">{error}</div>
       )}
 
       {/* Cards de Estatísticas (KPIs) */}
@@ -158,36 +158,35 @@ const Dashboard = () => {
 
       {/* Colunas de Clientes Recentes e Crescimento */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
+
         {/* Clientes Recentes */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-colors">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Clientes Recentes
           </h3>
           <div className="space-y-4">
             {loading && (
-                <p className="text-sm text-gray-500">Carregando...</p>
+              <p className="text-sm text-gray-500">Carregando...</p>
             )}
             {!loading && clientesRecentes.length === 0 && (
-                 <p className="text-sm text-gray-500">Nenhum cliente recente encontrado.</p>
+              <p className="text-sm text-gray-500">Nenhum cliente recente encontrado.</p>
             )}
-            
+
             {clientesRecentes.map((cliente) => (
               <div
                 key={cliente.id}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg transition-colors"
               >
                 <div>
-                  <p className="font-medium text-gray-900">{cliente.nomeCompleto}</p>
-                  <p className="text-sm text-gray-600">{cliente.plano}</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{cliente.nomeCompleto}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{cliente.plano}</p>
                 </div>
                 <div className="text-right">
                   <span
-                    className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      cliente.status === "Ativo"
+                    className={`px-2 py-1 text-xs font-medium rounded-full ${cliente.status === "Ativo"
                         ? "bg-green-100 text-green-800"
                         : "bg-red-100 text-red-800" // Ajustado (sem Pendente)
-                    }`}
+                      }`}
                   >
                     {cliente.status}
                   </span>
@@ -201,17 +200,17 @@ const Dashboard = () => {
         </div>
 
         {/* Crescimento de Clientes (Mock) */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-colors">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Crescimento de Clientes (Dados Falsos)
           </h3>
           <div className="space-y-4">
             {dadosMensais.map((dado, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg transition-colors"
               >
-                <span className="font-medium text-gray-900">
+                <span className="font-medium text-gray-900 dark:text-white">
                   {dado.mes}/2025
                 </span>
                 <div className="flex items-center space-x-4">
@@ -221,16 +220,16 @@ const Dashboard = () => {
                       style={{ width: `${(dado.clientes / 3000) * 100}%` }}
                     ></div>
                   </div>
-                  <span className="text-sm font-medium text-gray-900 w-16 text-right">
+                  <span className="text-sm font-medium text-gray-900 dark:text-white w-16 text-right">
                     {dado.clientes}
                   </span>
                 </div>
               </div>
             ))}
           </div>
-           <p className="text-xs text-gray-400 mt-3">
-              *Estes dados são falsos. ainda sera adicionado um novo campo no nosso banco para torna-los reais.
-           </p>
+          <p className="text-xs text-gray-400 mt-3">
+            *Estes dados são falsos. ainda sera adicionado um novo campo no nosso banco para torna-los reais.
+          </p>
         </div>
       </div>
     </div>
