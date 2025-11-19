@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
-// Adiciona 'Usuario'
-import type { TicketSuporte, Cliente, Usuario } from '../types'; 
-// Adiciona 'getUsuarios'
-import { getSuporteTicketById, updateSuporteTicket, getClientes, getUsuarios } from '../services/api'; 
+import type { TicketSuporte, Cliente, Tecnico } from '../types';
+import { getSuporteTicketById, updateSuporteTicket, getClientes, getTecnicos } from '../services/api';
 
 interface ModalEditarSuporteProps {
   ticketId: number;
@@ -10,15 +8,14 @@ interface ModalEditarSuporteProps {
   onSave: (ticketAtualizado: TicketSuporte) => void;
 }
 
-// O estado do formulário agora usa os nomes do backend
 interface EstadoFormEditar {
   titulo: string;
   descricao_problema: string;
   status: string;
   prioridade: string;
   id_cliente: number;
-  id_tecnico: number | null; // <<< --- CAMPO ADICIONADO --- >>>
-  inicio_desejado: string; 
+  id_tecnico: number | null;
+  inicio_desejado: string;
 }
 
 const ModalEditarSuporte: React.FC<ModalEditarSuporteProps> = ({ ticketId, onClose, onSave }) => {
@@ -26,39 +23,35 @@ const ModalEditarSuporte: React.FC<ModalEditarSuporteProps> = ({ ticketId, onClo
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saveLoading, setSaveLoading] = useState(false);
-  
+
   const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [usuarios, setUsuarios] = useState<Usuario[]>([]); // <<< --- NOVO ESTADO --- >>>
-  
-  // Carrega o ticket, a lista de clientes E a lista de usuários
+  const [tecnicos, setTecnicos] = useState<Tecnico[]>([]);
+
   useEffect(() => {
     const carregarDados = async () => {
       setLoading(true);
       setError(null);
       try {
-        // <<< --- MUDANÇA AQUI --- >>>
-        // Carrega 3 fontes de dados em paralelo
-        const [ticketData, clientesData, usuariosData] = await Promise.all([
+        const [ticketData, clientesData, tecnicosData] = await Promise.all([
           getSuporteTicketById(ticketId),
           getClientes(),
-          getUsuarios() // Busca a lista de técnicos
+          getTecnicos()
         ]);
-        
+
         setClientes(clientesData);
-        setUsuarios(usuariosData); // Salva a lista de técnicos
-        
+        setTecnicos(tecnicosData);
+
         const clienteDoTicket = clientesData.find(c => c.nomeCompleto === ticketData.cliente);
         const idClienteOriginal = clienteDoTicket ? clienteDoTicket.id : 0;
-        
-        // Preenche o formulário com todos os dados
+
         setFormData({
-            titulo: ticketData.titulo,
-            descricao_problema: ticketData.descricao,
-            status: ticketData.status,
-            prioridade: ticketData.prioridade,
-            id_cliente: idClienteOriginal,
-            id_tecnico: ticketData.id_tecnico || null, // <<< --- CAMPO ADICIONADO --- >>>
-            inicio_desejado: (ticketData as any).inicio_desejado_input || "", 
+          titulo: ticketData.titulo,
+          descricao_problema: ticketData.descricao,
+          status: ticketData.status,
+          prioridade: ticketData.prioridade,
+          id_cliente: idClienteOriginal,
+          id_tecnico: ticketData.id_tecnico || null,
+          inicio_desejado: (ticketData as any).inicio_desejado_input || "",
         });
 
       } catch (err: any) {
@@ -72,9 +65,8 @@ const ModalEditarSuporte: React.FC<ModalEditarSuporteProps> = ({ ticketId, onClo
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    // Converte IDs para número
     const valorFinal = (name === 'id_cliente' || name === 'id_tecnico') ? parseInt(value) || null : value;
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: valorFinal,
@@ -84,23 +76,21 @@ const ModalEditarSuporte: React.FC<ModalEditarSuporteProps> = ({ ticketId, onClo
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.id_cliente || formData.id_cliente === 0) {
-        setError("Não foi possível salvar, dados do cliente faltando.");
-        return;
+      setError("Não foi possível salvar, dados do cliente faltando.");
+      return;
     }
 
     setSaveLoading(true);
     setError(null);
 
     try {
-       // O payload já está no formato do backend, incluindo o id_tecnico
-       const payload = {
-           ...formData,
-           inicio_desejado: formData.inicio_desejado || null,
-           // id_tecnico já está em formData
-       };
-        
-       const ticketAtualizado = await updateSuporteTicket(ticketId, payload);
-       onSave(ticketAtualizado);
+      const payload = {
+        ...formData,
+        inicio_desejado: formData.inicio_desejado || null,
+      };
+
+      const ticketAtualizado = await updateSuporteTicket(ticketId, payload);
+      onSave(ticketAtualizado);
 
     } catch (err: any) {
       setError(err.message || "Falha ao salvar. Tente novamente.");
@@ -108,7 +98,7 @@ const ModalEditarSuporte: React.FC<ModalEditarSuporteProps> = ({ ticketId, onClo
       setSaveLoading(false);
     }
   };
-  
+
   if (loading) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -127,7 +117,7 @@ const ModalEditarSuporte: React.FC<ModalEditarSuporteProps> = ({ ticketId, onClo
       </div>
     );
   }
-  
+
   if (!formData.titulo) return null;
 
   return (
@@ -138,13 +128,13 @@ const ModalEditarSuporte: React.FC<ModalEditarSuporteProps> = ({ ticketId, onClo
         {error && <div className="p-3 bg-red-100 text-red-700 rounded-lg mb-4">{error}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          
+
           <div>
             <label htmlFor="id_cliente" className="block text-sm font-medium text-gray-700">Cliente*</label>
-            <select 
-              name="id_cliente" 
+            <select
+              name="id_cliente"
               value={formData.id_cliente || 0}
-              onChange={handleChange} 
+              onChange={handleChange}
               required
               className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
             >
@@ -164,49 +154,48 @@ const ModalEditarSuporte: React.FC<ModalEditarSuporteProps> = ({ ticketId, onClo
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             <div>
-                <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status*</label>
-                <select name="status" value={formData.status || 'Aberto'} onChange={handleChange} required
-                  className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" >
-                  <option value="Aberto">Aberto</option>
-                  <option value="Em andamento">Em andamento</option>
-                  <option value="Resolvido">Resolvido</option>
-                </select>
-              </div>
-              <div>
-                <label htmlFor="prioridade" className="block text-sm font-medium text-gray-700">Prioridade*</label>
-                <select name="prioridade" value={formData.prioridade || 'Baixa'} onChange={handleChange} required
-                  className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" >
-                  <option value="Baixa">Baixa</option>
-                  <option value="Média">Média</option>
-                  <option value="Alta">Alta</option>
-                </select>
-              </div>
+            <div>
+              <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status*</label>
+              <select name="status" value={formData.status || 'Aberto'} onChange={handleChange} required
+                className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" >
+                <option value="Aberto">Aberto</option>
+                <option value="Em andamento">Em andamento</option>
+                <option value="Resolvido">Resolvido</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="prioridade" className="block text-sm font-medium text-gray-700">Prioridade*</label>
+              <select name="prioridade" value={formData.prioridade || 'Baixa'} onChange={handleChange} required
+                className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" >
+                <option value="Baixa">Baixa</option>
+                <option value="Média">Média</option>
+                <option value="Alta">Alta</option>
+              </select>
+            </div>
           </div>
-          
-          {/* --- NOVO DROPDOWN DE TÉCNICO --- */}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <div>
-                <label htmlFor="id_tecnico" className="block text-sm font-medium text-gray-700">Atribuir Técnico</label>
-                <select 
-                  name="id_tecnico" 
-                  value={formData.id_tecnico || 0} // Usa 0 para 'Nenhum'
-                  onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value={0}>Nenhum técnico atribuído</option>
-                  {usuarios.map(user => (
-                    <option key={user.usuario_id} value={user.usuario_id}>
-                      {user.nome_completo}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="inicio_desejado" className="block text-sm font-medium text-gray-700">Início Desejado</label>
-                <input type="date" name="inicio_desejado" value={formData.inicio_desejado || ''} onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
-              </div>
+            <div>
+              <label htmlFor="id_tecnico" className="block text-sm font-medium text-gray-700">Atribuir Técnico</label>
+              <select
+                name="id_tecnico"
+                value={formData.id_tecnico || 0}
+                onChange={handleChange}
+                className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value={0}>Nenhum técnico atribuído</option>
+                {tecnicos.map(tec => (
+                  <option key={tec.id_tecnico} value={tec.id_tecnico}>
+                    {tec.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="inicio_desejado" className="block text-sm font-medium text-gray-700">Início Desejado</label>
+              <input type="date" name="inicio_desejado" value={formData.inicio_desejado || ''} onChange={handleChange}
+                className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
           </div>
 
           <div>

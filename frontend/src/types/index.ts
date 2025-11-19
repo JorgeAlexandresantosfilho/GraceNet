@@ -89,6 +89,14 @@ export interface Relatorio {
   color: string;
 }
 
+export interface Tecnico {
+  id_tecnico: number;
+  nome: string;
+  matricula: string;
+  equipe: string;
+  status: "Ativo" | "Férias" | "Inativo";
+}
+
 export interface Pop {
   id_torre: number;
   localizacao: string;

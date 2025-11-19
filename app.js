@@ -21,7 +21,7 @@ app.use('/', exports_routes);
 
 app.use('/Plans', plans_routes);
 
-app.use('/Support', os_routes); 
+app.use('/Support', os_routes);
 
 app.use('/Equip', equip_routes);
 
@@ -34,5 +34,8 @@ app.use('/auth', user_routes);
 app.use('/public', public_routes);
 
 app.use('/perfis', perfil_routes);
+
+const tecnicos_routes = require('./routes/tecnicos_routes');
+app.use('/Technicians', tecnicos_routes);
 
 module.exports = app;

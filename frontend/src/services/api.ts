@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Cliente, Plano, Equipamento, TicketSuporte, Usuario, PerfilAcesso, Pop } from '../types';
+import type { Cliente, Plano, Equipamento, TicketSuporte, Usuario, PerfilAcesso, Pop, Tecnico } from '../types';
 
 const apiClient = axios.create({
   baseURL: 'http://localhost:3000',
@@ -589,5 +589,52 @@ export const getAllPops = async (): Promise<Pop[]> => {
   } catch (error) {
     console.error("Erro ao buscar POPs:", error);
     throw new Error("Não foi possível carregar os POPs.");
+  }
+};
+
+// ===================================================================
+// FUNÇÕES DE TÉCNICOS
+// ===================================================================
+export const getTecnicos = async (): Promise<Tecnico[]> => {
+  try {
+    const response = await apiClient.get('/Technicians');
+    return Array.isArray(response.data) ? response.data : [];
+  } catch (error) {
+    console.error("Erro ao buscar técnicos:", error);
+    throw new Error("Não foi possível carregar a lista de técnicos.");
+  }
+};
+
+export const createTecnico = async (dados: Omit<Tecnico, 'id_tecnico'>): Promise<Tecnico> => {
+  try {
+    const response = await apiClient.post('/Technicians', dados);
+    if (response.data.result?.insertId) {
+      return { ...dados, id_tecnico: response.data.result.insertId };
+    }
+    throw new Error("Falha ao obter ID do novo técnico.");
+  } catch (error) {
+    console.error("Erro ao criar técnico:", error);
+    throw new Error("Falha ao cadastrar técnico.");
+  }
+};
+
+export const updateTecnico = async (id: number, dados: Partial<Tecnico>): Promise<void> => {
+  try {
+    await apiClient.put(`/Technicians/${id}`, dados);
+  } catch (error) {
+    console.error(`Erro ao atualizar técnico ${id}:`, error);
+    throw new Error("Falha ao atualizar técnico.");
+  }
+};
+
+export const deleteTecnico = async (id: number): Promise<void> => {
+  try {
+    await apiClient.delete(`/Technicians/${id}`);
+  } catch (error: any) {
+    console.error(`Erro ao excluir técnico ${id}:`, error);
+    if (error.response?.status === 409) {
+      throw new Error("Não é possível excluir: Técnico possui vínculos.");
+    }
+    throw new Error("Falha ao excluir técnico.");
   }
 };

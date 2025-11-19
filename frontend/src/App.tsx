@@ -17,10 +17,11 @@ import Reports from "./components/Reports";
 import UserManagement from "./components/UserManagement";
 import MeuPerfil from "./components/MeuPerfil";
 import MapComponent from "./components/MapComponent";
+import TechnicianManagement from "./components/TechnicianManagement";
 
 type Pagina =
   "dashboard" | "clientes" | "planos" | "equipamentos" |
-  "suporte" | "relatorios" | "usuarios" | "meuperfil" | "mapa";
+  "suporte" | "relatorios" | "usuarios" | "meuperfil" | "mapa" | "tecnicos";
 
 type AuthView = 'login' | 'register' | 'publicTicket';
 
@@ -71,6 +72,8 @@ function App() {
         return <MeuPerfil />;
       case "mapa":
         return <MapComponent />;
+      case "tecnicos":
+        return <TechnicianManagement />;
       default:
         return <Dashboard />;
     }

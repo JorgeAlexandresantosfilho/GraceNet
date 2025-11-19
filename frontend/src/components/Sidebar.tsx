@@ -1,5 +1,5 @@
 import React from "react";
-import { BarChart3, Headphones, Home, Menu, Users, Wifi, Router, FileText, Map } from "lucide-react";
+import { BarChart3, Headphones, Home, Menu, Users, Wifi, Router, FileText, Map, UserCog } from "lucide-react";
 
 interface SidebarProps {
   abaAtiva: string;
@@ -17,12 +17,13 @@ const Sidebar: React.FC<SidebarProps> = ({
   const itensMenu = [
     { id: "dashboard", rotulo: "Dashboard", icone: BarChart3 },
     { id: "clientes", rotulo: "Clientes", icone: Users },
-    { id: "planos", rotulo: "Planos", icone: Wifi },
+    { id: "planos", rotulo: "Plano", icone: Wifi },
     { id: "equipamentos", rotulo: "Equipamentos", icone: Router },
     { id: "suporte", rotulo: "Suporte", icone: Headphones },
     { id: "relatorios", rotulo: "Relatórios", icone: FileText },
     // <<< --- ADICIONE ESTA LINHA --- >>>
     { id: "usuarios", rotulo: "Usuários", icone: Users },
+    { id: "tecnicos", rotulo: "Funcionários", icone: UserCog },
     { id: "mapa", rotulo: "Mapa", icone: Map },
   ];
 
