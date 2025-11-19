@@ -1,5 +1,5 @@
 import React from "react";
-import { BarChart3, Headphones, Home, Menu, Users, Wifi, Router, FileText } from "lucide-react";
+import { BarChart3, Headphones, Home, Menu, Users, Wifi, Router, FileText, Map } from "lucide-react";
 
 interface SidebarProps {
   abaAtiva: string;
@@ -23,6 +23,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: "relatorios", rotulo: "Relatórios", icone: FileText },
     // <<< --- ADICIONE ESTA LINHA --- >>>
     { id: "usuarios", rotulo: "Usuários", icone: Users },
+    { id: "mapa", rotulo: "Mapa", icone: Map },
   ];
 
   return (
@@ -61,8 +62,8 @@ const Sidebar: React.FC<SidebarProps> = ({
               key={item.id}
               onClick={() => definirAbaAtiva(item.id)}
               className={`w-full flex items-center px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${estaAtivo
-                  ? 'bg-blue-50 dark:bg-blue-900/20 border-r-2 border-blue-600 text-blue-600 dark:text-blue-400'
-                  : 'text-gray-700 dark:text-gray-300'
+                ? 'bg-blue-50 dark:bg-blue-900/20 border-r-2 border-blue-600 text-blue-600 dark:text-blue-400'
+                : 'text-gray-700 dark:text-gray-300'
                 }`}
             >
               <Icon className={`w-5 h-5 ${estaAtivo ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`} />

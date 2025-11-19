@@ -2,9 +2,9 @@ const pop_models = require('../models/pop_models');
 
 
 async function InsertPop(req, res) {
-    const { localizacao, ip_gerenciamento } = req.body;
+    const { localizacao, ip_gerenciamento, latitude, longitude } = req.body;
     try {
-        const result = await pop_models.InsertPop(localizacao, ip_gerenciamento);
+        const result = await pop_models.InsertPop(localizacao, ip_gerenciamento, latitude, longitude);
         res.status(201).json({ msg: 'POP inserido com sucesso.', result });
     } catch (error) {
         res.status(500).json({ msg: 'Erro ao inserir POP.', error: error.message });
@@ -36,9 +36,9 @@ async function GetAllPop(req, res) {
 
 async function UpdatePop(req, res) {
     const { id_torre } = req.params;
-    const { localizacao, ip_gerenciamento } = req.body;
+    const { localizacao, ip_gerenciamento, latitude, longitude } = req.body;
     try {
-        const result = await pop_models.UpdatePop(id_torre, localizacao, ip_gerenciamento);
+        const result = await pop_models.UpdatePop(id_torre, localizacao, ip_gerenciamento, latitude, longitude);
         res.status(200).json({ msg: 'POP atualizado com sucesso.', result });
     } catch (error) {
         res.status(500).json({ msg: 'Erro ao atualizar POP.', error: error.message });

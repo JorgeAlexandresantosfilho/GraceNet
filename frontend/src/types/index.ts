@@ -11,6 +11,8 @@ export interface Cliente {
   plano: string;
   vencimento: string;
   dataNascimento?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface Plano {
@@ -85,4 +87,12 @@ export interface Relatorio {
   description: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   color: string;
+}
+
+export interface Pop {
+  id_torre: number;
+  localizacao: string;
+  ip_gerenciamento: string;
+  latitude?: number;
+  longitude?: number;
 }

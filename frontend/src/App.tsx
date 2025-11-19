@@ -16,10 +16,11 @@ import Support from "./components/Support";
 import Reports from "./components/Reports";
 import UserManagement from "./components/UserManagement";
 import MeuPerfil from "./components/MeuPerfil";
+import MapComponent from "./components/MapComponent";
 
 type Pagina =
   "dashboard" | "clientes" | "planos" | "equipamentos" |
-  "suporte" | "relatorios" | "usuarios" | "meuperfil";
+  "suporte" | "relatorios" | "usuarios" | "meuperfil" | "mapa";
 
 type AuthView = 'login' | 'register' | 'publicTicket';
 
@@ -68,6 +69,8 @@ function App() {
         return <UserManagement />;
       case "meuperfil":
         return <MeuPerfil />;
+      case "mapa":
+        return <MapComponent />;
       default:
         return <Dashboard />;
     }

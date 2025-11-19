@@ -1,9 +1,9 @@
 const db = require('../config/db');
 
-async function InsertCustomer(cpf, nome_completo, data_nascimento, rg, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status, id_plano) {
+async function InsertCustomer(cpf, nome_completo, data_nascimento, rg, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status, id_plano, latitude, longitude) {
     const [result] = await db.execute(
-        'INSERT INTO clientes (cpf, nome_completo, data_nascimento, rg, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status, id_plano) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-        [cpf, nome_completo, data_nascimento, rg, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status, id_plano]
+        'INSERT INTO clientes (cpf, nome_completo, data_nascimento, rg, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status, id_plano, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+        [cpf, nome_completo, data_nascimento, rg, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status, id_plano, latitude, longitude]
     );
     return result;
 }
@@ -18,20 +18,21 @@ async function GetCustomerById(id) {
     return rows[0];
 }
 
-async function UpdtCustomer(id_cliente, nome_completo, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status, id_plano) {
+async function UpdtCustomer(id_cliente, nome_completo, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status, id_plano, latitude, longitude) {
     const sql = `
         UPDATE clientes
         SET nome_completo = ?, telefone = ?, email = ?, cep = ?, rua = ?, numero = ?,
-            nome_rede = ?, senha_rede = ?, plano = ?, vencimento = ?, status = ?, id_plano = ?
+            nome_rede = ?, senha_rede = ?, plano = ?, vencimento = ?, status = ?, id_plano = ?,
+            latitude = ?, longitude = ?
         WHERE id_cliente = ?;
     `;
-    const values = [nome_completo, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status, id_plano, id_cliente];
+    const values = [nome_completo, telefone, email, cep, rua, numero, nome_rede, senha_rede, plano, vencimento, status, id_plano, latitude, longitude, id_cliente];
     const [rows] = await db.query(sql, values);
     return rows;
 }
 
 async function DeleteCustomer(id) {
-    const sql = "UPDATE clientes SET status = 0 WHERE id_cliente = ?"; 
+    const sql = "UPDATE clientes SET status = 0 WHERE id_cliente = ?";
     const [result] = await db.query(sql, [id]);
     return result;
 }

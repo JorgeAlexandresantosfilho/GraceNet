@@ -73,6 +73,8 @@ CREATE TABLE clientes (
     vencimento ENUM('10','20','30') NOT NULL,
     status TINYINT(1) DEFAULT 1,
     id_plano INT,
+    latitude DECIMAL(10,8),
+    longitude DECIMAL(11,8),
     
     FOREIGN KEY (id_plano) REFERENCES planos(id_plano)
 );
@@ -97,7 +99,9 @@ VALUES ('João Silva','TEC001','Equipe A','Ativo');
 CREATE TABLE pop(
     id_torre INT AUTO_INCREMENT PRIMARY KEY,
     localizacao VARCHAR(255) NOT NULL,
-    ip_gerenciamento VARCHAR(45) NOT NULL
+    ip_gerenciamento VARCHAR(45) NOT NULL,
+    latitude DECIMAL(10,8),
+    longitude DECIMAL(11,8)
 );
 
 -- ============================================================
