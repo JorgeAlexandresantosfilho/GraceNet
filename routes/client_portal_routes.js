@@ -3,7 +3,7 @@ const router = express.Router();
 const ClientPortal_controller = require('../controllers/ClientPortal_controller');
 const jwt = require('jsonwebtoken');
 
-const SECRET_KEY = process.env.JWT_SECRET || 'seusecret';
+const SECRET_KEY = process.env.JWT_SECRET || 'BRUCE_WAYNE';
 
 
 const verifyToken = (req, res, next) => {
