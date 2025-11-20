@@ -21,12 +21,12 @@ const StatCard: React.FC<{ title: string; value: string; change: string; icon: R
   icon: Icon,
   changeColor,
 }) => (
-  <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+  <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 transition-colors">
     <div className="flex items-center justify-between">
-      <span className="text-sm font-medium text-gray-600">{title}</span>
-      <Icon className="w-5 h-5 text-gray-400" />
+      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</span>
+      <Icon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
     </div>
-    <p className="text-3xl font-bold text-gray-900 mt-2">{value}</p>
+    <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{value}</p>
     <p className={`text-sm mt-1 ${changeColor}`}>
       {change}
     </p>
@@ -44,28 +44,28 @@ const ReportCard: React.FC<{ title: string; description: string; icon: React.Ele
   const buttonClasses = `
     mt-4 w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2
     ${disabled
-      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-      : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+      ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+      : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50'
     }
   `;
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col">
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col transition-colors">
       <div className="flex items-center space-x-3">
-        <div className="p-3 bg-gray-100 rounded-lg">
-          <Icon className="w-6 h-6 text-gray-600" />
+        <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+          <Icon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
         </div>
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-          <p className="text-sm text-gray-600">{description}</p>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
         </div>
       </div>
       <div className="flex-grow"></div>
-      
+
       {href && !disabled ? (
         <a
           href={href}
-          target="_blank" 
+          target="_blank"
           rel="noopener noreferrer"
           className={buttonClasses}
           download
@@ -89,25 +89,25 @@ const ReportCard: React.FC<{ title: string; description: string; icon: React.Ele
 const Reports = () => {
   // --- DADOS FALSOS (MOCK) ---
   const kpiData = [
-    { title: 'Receita Total (Dezembro)', value: 'R$ 284.750', change: '+12%', icon: DollarSign, changeColor: 'text-green-600' },
-    { title: 'Novos Clientes', value: '87', change: '+23%', icon: UserPlus, changeColor: 'text-green-600' },
-    { title: 'Taxa de Churn', value: '2.3%', change: '-0.5%', icon: TrendingDown, changeColor: 'text-red-600' },
-    { title: 'Uptime Médio', value: '99.2%', change: '+0.1%', icon: CheckCircle, changeColor: 'text-green-600' },
+    { title: 'Receita Total (Dezembro)', value: 'R$ 284.750', change: '+12%', icon: DollarSign, changeColor: 'text-green-600 dark:text-green-400' },
+    { title: 'Novos Clientes', value: '87', change: '+23%', icon: UserPlus, changeColor: 'text-green-600 dark:text-green-400' },
+    { title: 'Taxa de Churn', value: '2.3%', change: '-0.5%', icon: TrendingDown, changeColor: 'text-red-600 dark:text-red-400' },
+    { title: 'Uptime Médio', value: '99.2%', change: '+0.1%', icon: CheckCircle, changeColor: 'text-green-600 dark:text-green-400' },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Relatórios e Análises
           </h1>
-          <p className="text-gray-600 mt-1">Análises detalhadas do seu negócio</p>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Análises detalhadas do seu negócio</p>
         </div>
         <select
           title="filtro-tempo"
           defaultValue="ultimo-mes"
-          className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
         >
           <option value="hoje">Hoje</option>
           <option value="ultima-semana">Últimos 7 dias</option>
@@ -132,37 +132,37 @@ const Reports = () => {
 
       {/* Cards de Botões de Relatório */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        
+
         {/* --- AGORA HABILITADO --- */}
         <ReportCard
           title="Relatório Financeiro"
           description="Receita potencial por plano (clientes ativos)"
           icon={DollarSign}
-          href={`${API_URL}/export/financials`} 
+          href={`${API_URL}/export/financials`}
         />
-        
+
         {/* --- FUNCIONANDO --- */}
         <ReportCard
           title="Relatório de Clientes"
           description="Base de clientes e crescimento"
           icon={Users}
-          href={`${API_URL}/export/clients`} 
+          href={`${API_URL}/export/clients`}
         />
-        
+
         {/* --- AGORA HABILITADO --- */}
         <ReportCard
           title="Performance da Rede"
           description="Total de chamados por título"
           icon={Wifi}
-           href={`${API_URL}/export/network`}
+          href={`${API_URL}/export/network`}
         />
-        
+
         {/* --- AGORA HABILITADO --- */}
         <ReportCard
           title="Crescimento do Negócio"
           description="Novos clientes por mês (data de instalação)"
           icon={TrendingUp}
-           href={`${API_URL}/export/growth`}
+          href={`${API_URL}/export/growth`}
         />
       </div>
     </div>

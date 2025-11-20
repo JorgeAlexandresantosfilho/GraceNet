@@ -8,13 +8,10 @@ interface ModalEditarEquipamentoProps {
   onSave: (equipAtualizado: Equipamento) => void;
 }
 
-// --- CORREÇÃO AQUI ---
-// Não precisamos de uma interface 'EstadoFormEquipamento' separada.
-// Vamos usar o tipo 'Equipamento' diretamente, pois o atualizamos no types.ts
 const ModalEditarEquipamento: React.FC<ModalEditarEquipamentoProps> = ({ serialNumber, onClose, onSave }) => {
-  
+
   // O estado do formulário agora é Partial<Equipamento>
-  const [formData, setFormData] = useState<Partial<Equipamento>>({}); 
+  const [formData, setFormData] = useState<Partial<Equipamento>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saveLoading, setSaveLoading] = useState(false);
@@ -50,11 +47,11 @@ const ModalEditarEquipamento: React.FC<ModalEditarEquipamentoProps> = ({ serialN
     setError(null);
 
     // Validação
-     if (!formData.type || !formData.model || !formData.status || !formData.location) {
-        setError("Campos Tipo, Modelo, Status e Localização são obrigatórios.");
-        setSaveLoading(false);
-        return;
-     }
+    if (!formData.type || !formData.model || !formData.status || !formData.location) {
+      setError("Campos Tipo, Modelo, Status e Localização são obrigatórios.");
+      setSaveLoading(false);
+      return;
+    }
 
     try {
       // 'formData' agora é Partial<Equipamento> e já tem os nomes corretos
@@ -63,7 +60,6 @@ const ModalEditarEquipamento: React.FC<ModalEditarEquipamentoProps> = ({ serialN
 
       // Recria o objeto completo para atualizar a UI
       const equipamentoAtualizado: Equipamento = {
-        // --- CORREÇÕES AQUI ---
         id: formData.id || serialNumber,
         name: formData.fabricante ? `${formData.fabricante} ${formData.model}` : formData.model || '',
         type: formData.type || '',
@@ -88,108 +84,104 @@ const ModalEditarEquipamento: React.FC<ModalEditarEquipamentoProps> = ({ serialN
     }
   };
 
-   if (loading) {
-     return (
-       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-         <div className="bg-white p-6 rounded-lg shadow-xl">Carregando dados...</div>
-       </div>
-     );
-   }
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl text-gray-900 dark:text-white">Carregando dados...</div>
+      </div>
+    );
+  }
 
-   if (error && !formData.serialNumber) { 
-     return (
-       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-         <div className="bg-white p-6 rounded-lg shadow-xl">
-           <p className="text-red-500 mb-4">{error}</p>
-           <button onClick={onClose} className="mt-4 bg-gray-300 px-4 py-2 rounded">Fechar</button>
-         </div>
-       </div>
-     );
-   }
+  if (error && !formData.serialNumber) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
+          <p className="text-red-500 mb-4">{error}</p>
+          <button onClick={onClose} className="mt-4 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white px-4 py-2 rounded">Fechar</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-xl max-h-screen overflow-y-auto">
-        <h2 className="text-2xl font-bold mb-4">Editar Equipamento (S/N: {serialNumber})</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-700 transition-all">
+        <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Editar Equipamento (S/N: {serialNumber})</h2>
 
-        {error && !loading && <div className="p-3 bg-red-100 text-red-700 rounded-lg mb-4">{error}</div>}
+        {error && !loading && <div className="p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg mb-4 border border-red-200 dark:border-red-800">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
 
-           {/* Linha 1: Tipo, Modelo, Fabricante */}
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                 {/* --- CORREÇÃO AQUI --- */}
-                 {/* O 'name' deve bater com o estado: 'type' */}
-                 <label htmlFor="type" className="block text-sm font-medium text-gray-700">Tipo*</label>
-                 <input type="text" name="type" value={formData.type || ''} onChange={handleChange} required
-                  className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
-              </div>
-              <div>
-                <label htmlFor="model" className="block text-sm font-medium text-gray-700">Modelo*</label>
-                <input type="text" name="model" value={formData.model || ''} onChange={handleChange} required
-                  className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
-              </div>
-              <div>
-                 <label htmlFor="fabricante" className="block text-sm font-medium text-gray-700">Fabricante</label>
-                 <input type="text" name="fabricante" value={formData.fabricante || ''} onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
-              </div>
-           </div>
-
-            {/* Linha 2: Número Série (Read Only), MAC Address, IP Gerenciado */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-               <div>
-                 <label htmlFor="serialNumber" className="block text-sm font-medium text-gray-700">Número de Série</label>
-                 {/* --- CORREÇÃO AQUI --- */}
-                 <input type="text" name="serialNumber" value={formData.serialNumber || ''} readOnly disabled
-                   className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-2 bg-gray-100 text-gray-500" />
-               </div>
-               <div>
-                 <label htmlFor="mac_adress" className="block text-sm font-medium text-gray-700">MAC Address</label>
-                 <input type="text" name="mac_adress" value={formData.mac_adress || ''} onChange={handleChange}
-                   className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
-               </div>
-               <div>
-                 <label htmlFor="ip_gerenciado" className="block text-sm font-medium text-gray-700">IP Gerenciado</label>
-                 <input type="text" name="ip_gerenciado" value={formData.ip_gerenciado || ''} onChange={handleChange}
-                   className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
-               </div>
+          {/* Linha 1: Tipo, Modelo, Fabricante */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div>
+              <label htmlFor="type" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo*</label>
+              <input type="text" name="type" value={formData.type || ''} onChange={handleChange} required
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors" />
             </div>
+            <div>
+              <label htmlFor="model" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Modelo*</label>
+              <input type="text" name="model" value={formData.model || ''} onChange={handleChange} required
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors" />
+            </div>
+            <div>
+              <label htmlFor="fabricante" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fabricante</label>
+              <input type="text" name="fabricante" value={formData.fabricante || ''} onChange={handleChange}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors" />
+            </div>
+          </div>
 
-            {/* Linha 3: Firmware, Status, Localização */}
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                     <label htmlFor="firmware" className="block text-sm font-medium text-gray-700">Firmware</label>
-                     <input type="text" name="firmware" value={formData.firmware || ''} onChange={handleChange}
-                     className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
-                  </div>
-                  <div>
-                    <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status*</label>
-                    <select name="status" value={formData.status || 'Disponível'} onChange={handleChange} required
-                      className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" >
-                      <option value="Disponível">Disponível</option>
-                      <option value="Em uso">Em uso</option>
-                      <option value="Manutenção">Manutenção</option>
-                      <option value="Defeito">Defeito</option>
-                    </select>
-                  </div>
-                   <div>
-                     {/* --- CORREÇÃO AQUI --- */}
-                     <label htmlFor="location" className="block text-sm font-medium text-gray-700">Localização*</label>
-                     <input type="text" name="location" value={formData.location || ''} onChange={handleChange} required
-                     className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
-                  </div>
-             </div>
+          {/* Linha 2: Número Série (Read Only), MAC Address, IP Gerenciado */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div>
+              <label htmlFor="serialNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Número de Série</label>
+              <input type="text" name="serialNumber" value={formData.serialNumber || ''} readOnly disabled
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed" />
+            </div>
+            <div>
+              <label htmlFor="mac_adress" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">MAC Address</label>
+              <input type="text" name="mac_adress" value={formData.mac_adress || ''} onChange={handleChange}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors" />
+            </div>
+            <div>
+              <label htmlFor="ip_gerenciado" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">IP Gerenciado</label>
+              <input type="text" name="ip_gerenciado" value={formData.ip_gerenciado || ''} onChange={handleChange}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors" />
+            </div>
+          </div>
+
+          {/* Linha 3: Firmware, Status, Localização */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div>
+              <label htmlFor="firmware" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Firmware</label>
+              <input type="text" name="firmware" value={formData.firmware || ''} onChange={handleChange}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors" />
+            </div>
+            <div>
+              <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status*</label>
+              <select name="status" value={formData.status || 'Disponível'} onChange={handleChange} required
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors" >
+                <option value="Disponível">Disponível</option>
+                <option value="Em uso">Em uso</option>
+                <option value="Manutenção">Manutenção</option>
+                <option value="Defeito">Defeito</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Localização*</label>
+              <input type="text" name="location" value={formData.location || ''} onChange={handleChange} required
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors" />
+            </div>
+          </div>
 
           {/* Botões */}
-          <div className="flex justify-end space-x-3 pt-4">
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-100 dark:border-gray-700">
             <button type="button" onClick={onClose} disabled={saveLoading}
-              className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg transition-colors disabled:opacity-50" >
+              className="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 font-medium" >
               Cancelar
             </button>
             <button type="submit" disabled={saveLoading}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50" >
+              className="px-4 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors disabled:opacity-50 font-medium shadow-lg shadow-blue-600/20" >
               {saveLoading ? 'Salvando...' : 'Salvar Alterações'}
             </button>
           </div>
@@ -199,5 +191,4 @@ const ModalEditarEquipamento: React.FC<ModalEditarEquipamentoProps> = ({ serialN
   );
 };
 
-// Usa 'export default'
 export default ModalEditarEquipamento;

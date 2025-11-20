@@ -1,13 +1,8 @@
 import { useState, useEffect } from "react";
-import { Plus, Search, Edit, Trash2, Eye, Filter } from "lucide-react";
-// Importa TODAS as funções da API
-import { getClientes, deleteCliente, createCliente } from '../services/api'; 
+import { Plus, Search, Edit, Trash2, Eye, Filter, User, Phone, Mail, Calendar, CheckCircle, XCircle } from "lucide-react";
+import { getClientes, deleteCliente } from '../services/api';
 import type { Cliente } from "../types";
-
-// Importa os DOIS modais
-// <<< --- CORREÇÃO AQUI --- >>>
-// Removemos as chaves {} da importação para bater com o 'export default'
-import ModalEditarCliente from './ModalEditarCliente'; 
+import ModalEditarCliente from './ModalEditarCliente';
 import ModalAdicionarCliente from './ModalAdicionarCliente';
 
 interface CustomerManagementProps {
@@ -24,15 +19,13 @@ const CustumerManagement: React.FC<CustomerManagementProps> = ({
   const [busca, definirBusca] = useState("");
   const [filtro, setFiltro] = useState("todos");
 
-  // --- ESTADOS PARA CONTROLAR OS MODAIS ---
   const [isModalEditarAberto, setIsModalEditarAberto] = useState(false);
   const [isModalAdicionarAberto, setIsModalAdicionarAberto] = useState(false);
   const [clienteSelecionadoId, setClienteSelecionadoId] = useState<number | null>(null);
 
-  // Hook para buscar os dados quando o componente carregar
   useEffect(() => {
     carregarClientes();
-  }, []); // O array vazio [] faz com que isso execute apenas uma vez
+  }, []);
 
   const carregarClientes = async () => {
     try {
@@ -46,34 +39,32 @@ const CustumerManagement: React.FC<CustomerManagementProps> = ({
       setLoading(false);
     }
   };
-  
+
   const clientesFiltrados = clientes.filter((cliente) => {
     const nome = cliente.nomeCompleto || '';
     const email = cliente.email || '';
     const telefone = cliente.telefone || '';
-    
+
     const buscaEncontrada =
       nome.toLowerCase().includes(busca.toLowerCase()) ||
       email.toLowerCase().includes(busca.toLowerCase()) ||
       telefone.includes(busca);
-      
+
     const status = cliente.status || '';
     const statusFormatado = status.charAt(0).toUpperCase() + status.slice(1);
     const buscaStatus = filtro === "todos" || statusFormatado === filtro;
-    
+
     return buscaEncontrada && buscaStatus;
   });
 
-  // --- FUNÇÕES DE CONTROLE ---
   const handleExcluirCliente = async (id: number) => {
     if (!window.confirm("Tem certeza que deseja INATIVAR este cliente?")) {
-      return; 
+      return;
     }
     try {
-      await deleteCliente(id); // Isso faz o "Soft Delete" (UPDATE status = 0)
-      // Atualiza a lista na tela para refletir a mudança
-      setClientes(clientesAtuais => 
-        clientesAtuais.map(c => 
+      await deleteCliente(id);
+      setClientes(clientesAtuais =>
+        clientesAtuais.map(c =>
           c.id === id ? { ...c, status: 'Inativo' } : c
         )
       );
@@ -83,7 +74,6 @@ const CustumerManagement: React.FC<CustomerManagementProps> = ({
     }
   };
 
-  // --- FUNÇÕES DO MODAL DE EDITAR ---
   const handleAbrirModalEditar = (id: number) => {
     setClienteSelecionadoId(id);
     setIsModalEditarAberto(true);
@@ -96,194 +86,197 @@ const CustumerManagement: React.FC<CustomerManagementProps> = ({
 
   const handleSalvarEdicao = (clienteAtualizado: Partial<Cliente>) => {
     setClientes(clientesAtuais =>
-      clientesAtuais.map(c => 
+      clientesAtuais.map(c =>
         c.id === clienteSelecionadoId ? { ...c, ...clienteAtualizado } : c
       )
     );
     handleFecharModalEditar();
   };
-  
-  // --- FUNÇÕES DO MODAL DE ADICIONAR ---
+
   const handleAbrirModalAdicionar = () => {
     setIsModalAdicionarAberto(true);
   };
-  
+
   const handleFecharModalAdicionar = () => {
     setIsModalAdicionarAberto(false);
   };
-  
+
   const handleSalvarAdicao = (novoCliente: Cliente) => {
-    // Adiciona o novo cliente no topo da lista
     setClientes(clientesAtuais => [novoCliente, ...clientesAtuais]);
     handleFecharModalAdicionar();
   };
 
-  // --- RESTO DO COMPONENTE ---
-  const statusCor = (status: string) => {
-    switch (status) {
-      case "Ativo":
-        return "bg-green-100 text-green-800";
-      case "Inativo":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 bg-gray-800";
-    }
-  };
-
   if (loading) {
-    return <div className="p-4 text-center">Carregando clientes...</div>;
-  }
-
-  if (error) {
-    return <div className="p-4 text-center text-red-500">{error}</div>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
             Gestão de Clientes
           </h1>
-          <p className="text-gray-600 mt-1">Gerencie todos os clientes</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">
+            Gerencie sua base de assinantes.
+          </p>
         </div>
-        {/* BOTÃO "NOVO CLIENTE" AGORA ABRE O MODAL */}
         <button
           type="button"
           onClick={handleAbrirModalAdicionar}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center
-          space-x-2 transition-colors"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 font-medium"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-5 h-5" />
           <span>Novo Cliente</span>
         </button>
       </div>
 
-      {/* ... (Barra de busca e filtro - sem mudanças) ... */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl">
+          {error}
+        </div>
+      )}
+
+      {/* Barra de Busca e Filtro */}
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 transition-all">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Buscar"
+              placeholder="Buscar por nome, email ou telefone..."
               value={busca}
               onChange={(elemento) => definirBusca(elemento.target.value)}
-              className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 
-              focus:ring-blue-500 focus:border-transparent"
+              className="pl-10 pr-4 py-2.5 w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-400 transition-all"
             />
           </div>
-          <div className="flex items-center space-x-2">
-            <Filter className="w-4 h-4 text-gray-500" />
+          <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2">
+            <Filter className="w-4 h-4 text-gray-500 dark:text-gray-400" />
             <select
               title="filtro"
               value={filtro}
               onChange={(elemento) => setFiltro(elemento.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="bg-transparent border-none focus:ring-0 text-sm font-medium text-gray-700 dark:text-gray-200 cursor-pointer"
             >
-              <option value="todos">Todos os Status</option>
-              <option value="Ativo">Ativo</option>
-              <option value="Inativo">Inativo</option>
+              <option value="todos" className="dark:bg-gray-800">Todos os Status</option>
+              <option value="Ativo" className="dark:bg-gray-800">Ativo</option>
+              <option value="Inativo" className="dark:bg-gray-800">Inativo</option>
             </select>
           </div>
         </div>
       </div>
 
-      {/* ... (Tabela) ... */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      {/* Tabela */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gray-50 dark:bg-gray-900/50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Cliente
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Plano
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Vencimento
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Ações
-                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cliente</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Contato</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Plano</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Vencimento</th>
+                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ações</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {clientesFiltrados.map((cliente) => (
-                <tr
-                  key={cliente.id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {cliente.nomeCompleto}
-                      </div>
-                      <div className="text-sm  text-gray-500">
-                        {cliente.email}
-                      </div>
-                      <div className="text-sm  text-gray-500">
-                        {cliente.telefone}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{cliente.plano}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 py-1 text-xs font-medium rounded-full ${statusCor(
-                        cliente.status
-                      )}`}
-                    >
-                      {cliente.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {cliente.vencimento}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex items-center space-x-2">
-                      <button
-                        title="vizualizar"
-                        type="button"
-                        className="text-blue-600 hover:text-blue-900 p-1 hover:bg-blue-50 rounded"
-                          onClick={() => onSelecionarCliente(cliente.id)}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      
-                      <button
-                        title="editar"
-                        type="button"
-                        className="text-gray-600 hover:text-gray-900 p-1 hover:bg-gray-50 rounded"
-                        onClick={() => handleAbrirModalEditar(cliente.id)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      
-                      <button
-                        title="excluir"
-                        type="button"
-                        className="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded"
-                        onClick={() => handleExcluirCliente(cliente.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              {clientesFiltrados.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                    Nenhum cliente encontrado.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                clientesFiltrados.map((cliente) => (
+                  <tr
+                    key={cliente.id}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                          {cliente.nomeCompleto.substring(0, 2).toUpperCase()}
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                            {cliente.nomeCompleto}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            CPF: {cliente.cpf}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                          <Mail className="w-3.5 h-3.5 mr-1.5 text-gray-400" />
+                          {cliente.email}
+                        </div>
+                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                          <Phone className="w-3.5 h-3.5 mr-1.5 text-gray-400" />
+                          {cliente.telefone}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800">
+                        {cliente.plano}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border ${cliente.status === 'Ativo'
+                          ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-100 dark:border-green-800'
+                          : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-red-100 dark:border-red-800'
+                        }`}>
+                        {cliente.status === 'Ativo' ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                        {cliente.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                      <div className="flex items-center">
+                        <Calendar className="w-4 h-4 mr-1.5 text-gray-400" />
+                        Dia {cliente.vencimento}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => onSelecionarCliente(cliente.id)}
+                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                          title="Ver Detalhes"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleAbrirModalEditar(cliente.id)}
+                          className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-colors"
+                          title="Editar"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleExcluirCliente(cliente.id)}
+                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                          title="Excluir"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* --- RENDERIZA OS MODAIS SE ELES ESTIVEREM ABERTOS --- */}
       {isModalEditarAberto && clienteSelecionadoId && (
         <ModalEditarCliente
           clienteId={clienteSelecionadoId}
@@ -291,7 +284,7 @@ const CustumerManagement: React.FC<CustomerManagementProps> = ({
           onSave={handleSalvarEdicao}
         />
       )}
-      
+
       {isModalAdicionarAberto && (
         <ModalAdicionarCliente
           onClose={handleFecharModalAdicionar}
