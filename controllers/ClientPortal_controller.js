@@ -2,7 +2,7 @@ const Clients_models = require('../models/Clients_models');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-const SECRET_KEY = process.env.JWT_SECRET || 'BRUCE_WAYNE'; 
+const SECRET_KEY = process.env.JWT_SECRET || 'BRUCE_WAYNE';
 exports.Login = async (req, res) => {
     try {
         const { cpf, password } = req.body;
@@ -17,7 +17,7 @@ exports.Login = async (req, res) => {
             return res.status(404).json({ message: 'Cliente não encontrado.' });
         }
 
-        
+
         if (!client.senha_portal) {
             return res.status(403).json({ message: 'Acesso não configurado. Entre em contato com o suporte.' });
         }
@@ -60,13 +60,13 @@ exports.GetDashboardData = async (req, res) => {
             return res.status(404).json({ message: 'Cliente não encontrado.' });
         }
 
-        
+
         const invoices = [
             { id: 1, vencimento: '2023-11-10', valor: 99.90, status: 'Pago' },
             { id: 2, vencimento: '2023-12-10', valor: 99.90, status: 'Pendente' }
         ];
 
-       
+
 
         res.status(200).json({
             client: {
@@ -82,5 +82,81 @@ exports.GetDashboardData = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Erro ao buscar dados do dashboard.' });
+    }
+};
+
+exports.ActivateAccount = async (req, res) => {
+    try {
+        const { cpf, data_nascimento, password } = req.body;
+
+        if (!cpf || !data_nascimento || !password) {
+            return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
+        }
+
+        const client = await Clients_models.CheckClientLogin(cpf);
+
+        if (!client) {
+            return res.status(404).json({ message: 'Cliente não encontrado.' });
+        }
+
+       
+        const dbDate = new Date(client.data_nascimento).toISOString().split('T')[0];
+        const inputDate = new Date(data_nascimento).toISOString().split('T')[0];
+
+        if (dbDate !== inputDate) {
+            return res.status(400).json({ message: 'Dados incorretos.' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await Clients_models.UpdateClientPassword(client.id_cliente, hashedPassword);
+
+        res.status(200).json({ message: 'Conta ativada com sucesso! Faça login.' });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Erro ao ativar conta.' });
+    }
+};
+
+exports.RegisterNewClient = async (req, res) => {
+    try {
+        const { nome_completo, cpf, data_nascimento, rg, telefone, email, cep, rua, numero, plano, password } = req.body;
+
+      
+        if (!nome_completo || !cpf || !password || !plano) {
+            return res.status(400).json({ message: 'Campos obrigatórios faltando.' });
+        }
+
+        const existingClient = await Clients_models.CheckClientLogin(cpf);
+        if (existingClient) {
+            return res.status(400).json({ message: 'CPF já cadastrado.' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+       
+        const status = 1; 
+        const nome_rede = 'A Configurar';
+        const senha_rede = 'mudar123';
+        const vencimento = '10';
+        const id_plano = null; 
+        const latitude = null;
+        const longitude = null;
+
+        await Clients_models.InsertCustomer(
+            cpf, nome_completo, data_nascimento, rg, telefone, email,
+            cep, rua, numero, nome_rede, senha_rede, plano,
+            vencimento, status, id_plano, latitude, longitude
+        );
+
+      
+        const newClient = await Clients_models.CheckClientLogin(cpf);
+        await Clients_models.UpdateClientPassword(newClient.id_cliente, hashedPassword);
+
+        res.status(201).json({ message: 'Cadastro realizado com sucesso! Faça login.' });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Erro ao realizar cadastro.' });
     }
 };

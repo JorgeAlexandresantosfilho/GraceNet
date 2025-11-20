@@ -154,7 +154,10 @@ const LandingPage: React.FC = () => {
                                     Suporte Prioritário
                                 </li>
                             </ul>
-                            <button className="w-full py-3 rounded-xl bg-white/10 hover:bg-white/20 font-semibold transition-colors">
+                            <button
+                                onClick={() => navigate('/assinar?plano=Básico 300 MEGA')}
+                                className="w-full py-3 rounded-xl bg-white/10 hover:bg-white/20 font-semibold transition-colors"
+                            >
                                 Assinar Agora
                             </button>
                         </div>
@@ -188,7 +191,10 @@ const LandingPage: React.FC = () => {
                                     IP Fixo Opcional
                                 </li>
                             </ul>
-                            <button className="w-full py-4 rounded-xl bg-white text-blue-600 font-bold hover:bg-blue-50 transition-colors shadow-lg">
+                            <button
+                                onClick={() => navigate('/assinar?plano=Gamer 600 MEGA')}
+                                className="w-full py-4 rounded-xl bg-white text-blue-600 font-bold hover:bg-blue-50 transition-colors shadow-lg"
+                            >
                                 Assinar Agora
                             </button>
                         </div>
@@ -219,7 +225,10 @@ const LandingPage: React.FC = () => {
                                     Atendimento VIP
                                 </li>
                             </ul>
-                            <button className="w-full py-3 rounded-xl bg-white/10 hover:bg-white/20 font-semibold transition-colors">
+                            <button
+                                onClick={() => navigate('/assinar?plano=Ultra 1 GIGA')}
+                                className="w-full py-3 rounded-xl bg-white/10 hover:bg-white/20 font-semibold transition-colors"
+                            >
                                 Assinar Agora
                             </button>
                         </div>

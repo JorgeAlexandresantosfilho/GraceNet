@@ -25,7 +25,7 @@ const ClientDashboard: React.FC = () => {
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem('clientToken');
-                const response = await fetch('http://localhost:5000/ClientPortal/dashboard', {
+                const response = await fetch('http://localhost:3000/ClientPortal/dashboard', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }

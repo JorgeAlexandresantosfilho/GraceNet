@@ -18,6 +18,8 @@ const verifyToken = (req, res, next) => {
 };
 
 router.post('/login', ClientPortal_controller.Login);
+router.post('/activate', ClientPortal_controller.ActivateAccount);
+router.post('/register', ClientPortal_controller.RegisterNewClient);
 router.get('/dashboard', verifyToken, ClientPortal_controller.GetDashboardData);
 
 module.exports = router;

@@ -15,7 +15,7 @@ const ClientLogin: React.FC = () => {
         setLoading(true);
 
         try {
-            const response = await fetch('http://localhost:5000/ClientPortal/login', {
+            const response = await fetch('http://localhost:3000/ClientPortal/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -104,13 +104,23 @@ const ClientLogin: React.FC = () => {
                         </button>
                     </form>
 
-                    <div className="mt-8 text-center">
+                    <div className="mt-8 text-center space-y-4">
                         <p className="text-sm text-blue-300/60">
-                            Problemas com acesso?{' '}
-                            <a href="#" className="text-blue-400 hover:text-blue-300 transition-colors">
-                                Fale com o suporte
-                            </a>
+                            Primeiro acesso?{' '}
+                            <button onClick={() => navigate('/area-cliente/ativar')} className="text-blue-400 hover:text-blue-300 transition-colors font-medium">
+                                Ative sua conta
+                            </button>
                         </p>
+
+                        <div className="pt-4 border-t border-white/10">
+                            <button
+                                onClick={() => navigate('/public-ticket')}
+                                className="text-sm text-slate-400 hover:text-white transition-colors flex items-center justify-center gap-2 w-full"
+                            >
+                                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                                Abrir Chamado de Suporte (Sem Login)
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

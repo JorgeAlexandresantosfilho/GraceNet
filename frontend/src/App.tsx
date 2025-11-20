@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import Register from "./components/auth/Register";
 import PublicTicketForm from "./components/auth/PublicTicketForm";
 import Login from "./components/auth/Login";
-import { isUserLoggedIn, logoutUser, getCurrentUser } from "./services/api";
+import { isUserLoggedIn, logoutUser } from "./services/api";
 
 import CustomerDetails from "./components/CustomerDetails";
 import Header from "./components/Header";
@@ -24,6 +24,8 @@ import ClientLogin from "./pages/ClientLogin";
 import ClientLayout from "./layouts/ClientLayout";
 import ClientDashboard from "./pages/ClientDashboard";
 import LandingPage from "./pages/LandingPage";
+import ClientActivation from "./pages/ClientActivation";
+import ClientSignUp from "./pages/ClientSignUp";
 
 import { ThemeProvider } from "./contexts/ThemeContext";
 
@@ -38,10 +40,13 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
+          <Route path="/assinar" element={<ClientSignUp />} />
+          <Route path="/public-ticket" element={<PublicTicketFormWrapper />} />
           <Route path="/login" element={<AdminAuthWrapper />} />
 
           {/* Client Area Routes */}
           <Route path="/area-cliente/login" element={<ClientLogin />} />
+          <Route path="/area-cliente/ativar" element={<ClientActivation />} />
           <Route path="/area-cliente" element={<ClientLayout />}>
             <Route path="dashboard" element={<ClientDashboard />} />
             <Route path="faturas" element={<ClientDashboard />} />
@@ -79,6 +84,11 @@ function AdminAuthWrapper() {
     default:
       return <Login onLogin={handleLoginSuccess} onNavigateToRegister={() => setAuthView('register')} onNavigateToPublicTicket={() => setAuthView('publicTicket')} />;
   }
+}
+
+function PublicTicketFormWrapper() {
+  const navigate = useNavigate();
+  return <PublicTicketForm onNavigateToLogin={() => navigate('/')} />;
 }
 
 // Admin Layout Component (formerly the main App logic)

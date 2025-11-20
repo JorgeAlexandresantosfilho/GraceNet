@@ -70,6 +70,8 @@ CREATE TABLE clientes (
     nome_rede VARCHAR(50) NOT NULL,
     senha_rede VARCHAR(100) NOT NULL,
     senha_portal VARCHAR(255),
+  latitude VARCHAR(50),
+  longitude VARCHAR(50),
     plano VARCHAR(50) NOT NULL,
     vencimento ENUM('10','20','30') NOT NULL,
     status TINYINT(1) DEFAULT 1,
