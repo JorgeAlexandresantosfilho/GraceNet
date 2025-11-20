@@ -41,4 +41,7 @@ app.use('/Technicians', tecnicos_routes);
 const client_portal_routes = require('./routes/client_portal_routes');
 app.use('/ClientPortal', client_portal_routes);
 
+const logs_routes = require('./routes/logs_routes');
+app.use('/Logs', logs_routes);
+
 module.exports = app;

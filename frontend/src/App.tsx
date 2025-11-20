@@ -18,6 +18,7 @@ import UserManagement from "./components/UserManagement";
 import MeuPerfil from "./components/MeuPerfil";
 import MapComponent from "./components/MapComponent";
 import TechnicianManagement from "./components/TechnicianManagement";
+import SystemLogs from "./components/SystemLogs";
 
 // Client Area Imports
 import ClientLogin from "./pages/ClientLogin";
@@ -31,7 +32,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 
 type Pagina =
   "dashboard" | "clientes" | "planos" | "equipamentos" |
-  "suporte" | "relatorios" | "usuarios" | "meuperfil" | "mapa" | "tecnicos";
+  "suporte" | "relatorios" | "usuarios" | "meuperfil" | "mapa" | "tecnicos" | "logs";
 
 function App() {
   return (
@@ -128,6 +129,7 @@ function AdminLayout() {
       case "meuperfil": return <MeuPerfil />;
       case "mapa": return <MapComponent />;
       case "tecnicos": return <TechnicianManagement />;
+      case "logs": return <SystemLogs />;
       default: return <Dashboard />;
     }
   };

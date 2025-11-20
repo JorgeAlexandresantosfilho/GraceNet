@@ -70,8 +70,7 @@ CREATE TABLE clientes (
     nome_rede VARCHAR(50) NOT NULL,
     senha_rede VARCHAR(100) NOT NULL,
     senha_portal VARCHAR(255),
-  latitude VARCHAR(50),
-  longitude VARCHAR(50),
+
     plano VARCHAR(50) NOT NULL,
     vencimento ENUM('10','20','30') NOT NULL,
     status TINYINT(1) DEFAULT 1,
@@ -224,18 +223,20 @@ CREATE PROCEDURE sp_cliente_inserir(
     IN p_plano VARCHAR(50),
     IN p_vencimento VARCHAR(2),
     IN p_status TINYINT(1),
-    IN p_id_plano INT
+    IN p_id_plano INT,
+    IN p_latitude DECIMAL(10,8),
+    IN p_longitude DECIMAL(11,8)
 )
 BEGIN
     INSERT INTO clientes (
         cpf, nome_completo, data_nascimento, rg, telefone, email,
         cep, rua, numero, nome_rede, senha_rede, plano, vencimento,
-        status, id_plano
+        status, id_plano, latitude, longitude
     )
     VALUES (
         p_cpf, p_nome_completo, p_data_nascimento, p_rg, p_telefone, p_email,
         p_cep, p_rua, p_numero, p_nome_rede, p_senha_rede, p_plano,
-        p_vencimento, p_status, p_id_plano
+        p_vencimento, p_status, p_id_plano, p_latitude, p_longitude
     );
 END $$
 DELIMITER ;

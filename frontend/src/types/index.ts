@@ -15,6 +15,16 @@ export interface Cliente {
   longitude?: number;
 }
 
+export interface Log {
+  id_log: number;
+  tabela_afetada: string;
+  id_registro_afetado: number;
+  tipo_acao: "INSERÇÃO" | "ATUALIZAÇÃO" | "EXCLUSÃO";
+  descricao_acao: string;
+  usuario_responsavel: string;
+  data_acao: string;
+}
+
 export interface Plano {
   id: number;
   nome: string;

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Cliente, Plano, Equipamento, TicketSuporte, Usuario, PerfilAcesso, Pop, Tecnico } from '../types';
+import type { Cliente, Plano, Equipamento, TicketSuporte, Usuario, PerfilAcesso, Pop, Tecnico, Log } from '../types';
 
 const apiClient = axios.create({
   baseURL: 'http://localhost:3000',
@@ -636,5 +636,18 @@ export const deleteTecnico = async (id: number): Promise<void> => {
       throw new Error("Não é possível excluir: Técnico possui vínculos.");
     }
     throw new Error("Falha ao excluir técnico.");
+  }
+};
+
+// ===================================================================
+// FUNÇÕES DE LOGS
+// ===================================================================
+export const getSystemLogs = async (): Promise<Log[]> => {
+  try {
+    const response = await apiClient.get('/Logs');
+    return Array.isArray(response.data) ? response.data : [];
+  } catch (error) {
+    console.error("Erro ao buscar logs:", error);
+    throw new Error("Não foi possível carregar os logs do sistema.");
   }
 };

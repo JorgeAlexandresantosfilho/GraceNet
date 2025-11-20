@@ -25,6 +25,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: "usuarios", rotulo: "Usuários", icone: Users },
     { id: "tecnicos", rotulo: "Funcionários", icone: UserCog },
     { id: "mapa", rotulo: "Mapa", icone: Map },
+    { id: "logs", rotulo: "Logs", icone: FileText },
   ];
 
   return (
