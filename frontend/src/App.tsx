@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import Register from "./components/auth/Register";
 import PublicTicketForm from "./components/auth/PublicTicketForm";
@@ -65,14 +65,16 @@ function App() {
 // Wrapper to handle Admin Login/Register logic
 function AdminAuthWrapper() {
   const [authView, setAuthView] = useState<'login' | 'register' | 'publicTicket'>('login');
-  const [isLoggedIn, setIsLoggedIn] = useState(isUserLoggedIn().auth);
+  const navigate = useNavigate();
 
-  if (isLoggedIn) {
-    return <Navigate to="/admin" replace />;
-  }
+  useEffect(() => {
+    // Se o usuário acessar a página de login, fazemos logout para garantir
+    // que ele precise digitar as credenciais novamente.
+    logoutUser();
+  }, []);
 
   const handleLoginSuccess = () => {
-    setIsLoggedIn(true);
+    navigate('/admin');
   };
 
   switch (authView) {
@@ -110,6 +112,19 @@ function AdminLayout() {
   };
 
   const renderizarConteudo = () => {
+    // Proteção básica de rotas no frontend
+    const isAdmin = auth.user?.perfil_id === 1;
+    const rotasAdmin = ["planos", "relatorios", "usuarios", "tecnicos", "logs"];
+
+    if (rotasAdmin.includes(abaAtiva) && !isAdmin) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full text-gray-500">
+          <p className="text-xl font-semibold">Acesso Restrito</p>
+          <p>Você não tem permissão para acessar esta página.</p>
+        </div>
+      );
+    }
+
     if (idClienteSelecionado)
       return (
         <CustomerDetails
@@ -135,7 +150,7 @@ function AdminLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex transition-colors duration-200">
+    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans transition-colors duration-300">
       <Sidebar
         abaAtiva={abaAtiva}
         definirAbaAtiva={(tab: string) => definirAbaAtiva(tab as Pagina)}

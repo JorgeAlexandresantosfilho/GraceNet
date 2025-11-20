@@ -21,7 +21,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: "equipamentos", rotulo: "Equipamentos", icone: Router },
     { id: "suporte", rotulo: "Suporte", icone: Headphones },
     { id: "relatorios", rotulo: "Relatórios", icone: FileText },
-    // <<< --- ADICIONE ESTA LINHA --- >>>
     { id: "usuarios", rotulo: "Usuários", icone: Users },
     { id: "tecnicos", rotulo: "Funcionários", icone: UserCog },
     { id: "mapa", rotulo: "Mapa", icone: Map },
