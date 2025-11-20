@@ -38,4 +38,7 @@ app.use('/perfis', perfil_routes);
 const tecnicos_routes = require('./routes/tecnicos_routes');
 app.use('/Technicians', tecnicos_routes);
 
+const client_portal_routes = require('./routes/client_portal_routes');
+app.use('/ClientPortal', client_portal_routes);
+
 module.exports = app;

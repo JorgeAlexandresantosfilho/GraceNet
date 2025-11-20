@@ -1,9 +1,9 @@
 import { useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Register from "./components/auth/Register";
 import PublicTicketForm from "./components/auth/PublicTicketForm";
 import Login from "./components/auth/Login";
 import { isUserLoggedIn, logoutUser, getCurrentUser } from "./services/api";
-import type { Usuario } from "./types";
 
 import CustomerDetails from "./components/CustomerDetails";
 import Header from "./components/Header";
@@ -19,29 +19,83 @@ import MeuPerfil from "./components/MeuPerfil";
 import MapComponent from "./components/MapComponent";
 import TechnicianManagement from "./components/TechnicianManagement";
 
+// Client Area Imports
+import ClientLogin from "./pages/ClientLogin";
+import ClientLayout from "./layouts/ClientLayout";
+import ClientDashboard from "./pages/ClientDashboard";
+import LandingPage from "./pages/LandingPage";
+
+import { ThemeProvider } from "./contexts/ThemeContext";
+
 type Pagina =
   "dashboard" | "clientes" | "planos" | "equipamentos" |
   "suporte" | "relatorios" | "usuarios" | "meuperfil" | "mapa" | "tecnicos";
 
-type AuthView = 'login' | 'register' | 'publicTicket';
-
 function App() {
-  const [authData, setAuthData] = useState(isUserLoggedIn());
-  const [abaAtiva, definirAbaAtiva] = useState<Pagina>("dashboard");
+  return (
+    <ThemeProvider>
+      <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<AdminAuthWrapper />} />
 
+          {/* Client Area Routes */}
+          <Route path="/area-cliente/login" element={<ClientLogin />} />
+          <Route path="/area-cliente" element={<ClientLayout />}>
+            <Route path="dashboard" element={<ClientDashboard />} />
+            <Route path="faturas" element={<ClientDashboard />} />
+            <Route path="suporte" element={<ClientDashboard />} />
+          </Route>
+
+          {/* Admin/Employee Routes */}
+          <Route path="/admin/*" element={<AdminLayout />} />
+        </Routes>
+      </Router>
+    </ThemeProvider>
+  );
+}
+
+// Wrapper to handle Admin Login/Register logic
+function AdminAuthWrapper() {
+  const [authView, setAuthView] = useState<'login' | 'register' | 'publicTicket'>('login');
+  const [isLoggedIn, setIsLoggedIn] = useState(isUserLoggedIn().auth);
+
+  if (isLoggedIn) {
+    return <Navigate to="/admin" replace />;
+  }
+
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
+  };
+
+  switch (authView) {
+    case 'login':
+      return <Login onLogin={handleLoginSuccess} onNavigateToRegister={() => setAuthView('register')} onNavigateToPublicTicket={() => setAuthView('publicTicket')} />;
+    case 'register':
+      return <Register onNavigateToLogin={() => setAuthView('login')} />;
+    case 'publicTicket':
+      return <PublicTicketForm onNavigateToLogin={() => setAuthView('login')} />;
+    default:
+      return <Login onLogin={handleLoginSuccess} onNavigateToRegister={() => setAuthView('register')} onNavigateToPublicTicket={() => setAuthView('publicTicket')} />;
+  }
+}
+
+// Admin Layout Component (formerly the main App logic)
+function AdminLayout() {
+  const auth = isUserLoggedIn();
+
+  if (!auth.auth) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const [abaAtiva, definirAbaAtiva] = useState<Pagina>("dashboard");
   const [barraLateralRecolhida, definirBarraLateralRecolhida] = useState(false);
   const [idClienteSelecionado, definirIdClienteSelecionado] = useState<number | null>(null);
-  const [authView, setAuthView] = useState<AuthView>("login");
-
-  const handleLogin = () => {
-    const usuario = getCurrentUser();
-    setAuthData({ auth: true, user: usuario });
-  };
 
   const handleLogout = () => {
     logoutUser();
-    setAuthData({ auth: false, user: null });
-    setAuthView("login");
+    window.location.href = '/login';
   };
 
   const renderizarConteudo = () => {
@@ -54,59 +108,19 @@ function App() {
       );
 
     switch (abaAtiva) {
-      case "dashboard":
-        return <Dashboard />;
-      case "clientes":
-        return <CustumerManagement onSelecionarCliente={definirIdClienteSelecionado} />;
-      case "planos":
-        return <Plans />;
-      case "equipamentos":
-        return <Equipment />;
-      case "suporte":
-        return <Support />;
-      case "relatorios":
-        return <Reports />;
-      case "usuarios":
-        return <UserManagement />;
-      case "meuperfil":
-        return <MeuPerfil />;
-      case "mapa":
-        return <MapComponent />;
-      case "tecnicos":
-        return <TechnicianManagement />;
-      default:
-        return <Dashboard />;
+      case "dashboard": return <Dashboard />;
+      case "clientes": return <CustumerManagement onSelecionarCliente={definirIdClienteSelecionado} />;
+      case "planos": return <Plans />;
+      case "equipamentos": return <Equipment />;
+      case "suporte": return <Support />;
+      case "relatorios": return <Reports />;
+      case "usuarios": return <UserManagement />;
+      case "meuperfil": return <MeuPerfil />;
+      case "mapa": return <MapComponent />;
+      case "tecnicos": return <TechnicianManagement />;
+      default: return <Dashboard />;
     }
   };
-
-  const renderizarAutenticacao = () => {
-    switch (authView) {
-      case "login":
-        return (
-          <Login
-            onLogin={handleLogin}
-            onNavigateToRegister={() => setAuthView("register")}
-            onNavigateToPublicTicket={() => setAuthView("publicTicket")}
-          />
-        );
-      case "register":
-        return (
-          <Register
-            onNavigateToLogin={() => setAuthView("login")}
-          />
-        );
-      case "publicTicket":
-        return (
-          <PublicTicketForm
-            onNavigateToLogin={() => setAuthView("login")}
-          />
-        );
-      default:
-        return <div>Erro</div>;
-    }
-  };
-
-  if (!authData.auth) return renderizarAutenticacao();
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex transition-colors duration-200">
@@ -117,16 +131,12 @@ function App() {
         definirRecolhida={definirBarraLateralRecolhida}
       />
 
-      <div
-        className={`flex-1 flex flex-col transition-all duration-300 ${barraLateralRecolhida ? "ml-16" : "ml-64"
-          }`}
-      >
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${barraLateralRecolhida ? "ml-16" : "ml-64"}`}>
         <Header
-          currentUser={authData.user}
+          currentUser={auth.user}
           onLogout={handleLogout}
           onOpenProfile={() => definirAbaAtiva("meuperfil")}
         />
-
         <main className="flex-1 p-6">{renderizarConteudo()}</main>
       </div>
     </div>

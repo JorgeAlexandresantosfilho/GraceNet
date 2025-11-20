@@ -69,6 +69,7 @@ CREATE TABLE clientes (
     numero VARCHAR(10) NOT NULL,
     nome_rede VARCHAR(50) NOT NULL,
     senha_rede VARCHAR(100) NOT NULL,
+    senha_portal VARCHAR(255),
     plano VARCHAR(50) NOT NULL,
     vencimento ENUM('10','20','30') NOT NULL,
     status TINYINT(1) DEFAULT 1,

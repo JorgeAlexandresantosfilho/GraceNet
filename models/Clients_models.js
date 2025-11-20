@@ -42,5 +42,17 @@ module.exports = {
     GetAllCustomer,
     GetCustomerById,
     UpdtCustomer,
-    DeleteCustomer
+    DeleteCustomer,
+    CheckClientLogin,
+    UpdateClientPassword
 };
+
+async function CheckClientLogin(cpf) {
+    const [rows] = await db.query('SELECT * FROM clientes WHERE cpf = ?', [cpf]);
+    return rows[0];
+}
+
+async function UpdateClientPassword(id, newPassword) {
+    const [result] = await db.query('UPDATE clientes SET senha_portal = ? WHERE id_cliente = ?', [newPassword, id]);
+    return result;
+}
