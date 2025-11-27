@@ -1,9 +1,9 @@
 const os_models = require('../models/os_models');
-const db = require('../config/db'); 
+const db = require('../config/db');
 
 
 async function OpenPublicTicket(req, res) {
- 
+
     const { cpf, titulo, descricao_problema } = req.body;
 
     if (!cpf || !titulo || !descricao_problema) {
@@ -11,7 +11,7 @@ async function OpenPublicTicket(req, res) {
     }
 
     try {
-     
+
         const [rows] = await db.query('SELECT id_cliente FROM clientes WHERE cpf = ?', [cpf]);
         const cliente = rows[0];
 
@@ -21,14 +21,17 @@ async function OpenPublicTicket(req, res) {
 
         const id_cliente = cliente.id_cliente;
 
-      
-        const status = 'Aberto';
-        const prioridade = 'Média';
-        const inicio_desejado = new Date(); 
-        const conclusao_desejada = null;
-        const id_tecnico = null; 
 
-       
+        const status = 'Aberto';
+        const prioridade = 'Baixa';
+        // Format date as YYYY-MM-DD HH:MM:SS
+        const now = new Date();
+        const inicio_desejado = now.toISOString().slice(0, 19).replace('T', ' ');
+        const conclusao_desejada = null;
+        const id_tecnico = null;
+
+        console.log("Tentando criar ticket:", { titulo, status, prioridade, inicio_desejado, id_cliente });
+
         const crtl_result = await os_models.addOS(
             titulo,
             descricao_problema,
@@ -39,6 +42,8 @@ async function OpenPublicTicket(req, res) {
             id_cliente,
             id_tecnico
         );
+
+        console.log("Ticket criado com sucesso, ID:", crtl_result.insertId);
 
         return res.status(201).json({ msg: 'Chamado aberto com sucesso! Em breve um técnico entrará em contato.', ticketId: crtl_result.insertId });
 

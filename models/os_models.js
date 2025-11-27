@@ -21,7 +21,7 @@ async function GetOS(codigo_os) {
 
 async function GetAllOS() {
     const [rows] = await db.query(
-       `SELECT s.os_id, s.titulo, s.status, s.prioridade, s.id_cliente, s.id_tecnico,
+        `SELECT s.os_id, s.titulo, s.status, s.prioridade, s.id_cliente, s.id_tecnico,
                s.descricao_problema, s.inicio_desejado, s.conclusao_desejada,
                c.nome_completo, c.telefone, c.plano 
         FROM suportes s
@@ -41,9 +41,21 @@ async function UpdateOS(os_id, titulo, descricao_problema, inicio_desejado, conc
     return rows;
 }
 
+async function GetOSByClient(id_cliente) {
+    const [rows] = await db.query(
+        `SELECT s.os_id, s.titulo, s.status, s.prioridade, s.descricao_problema, s.inicio_desejado, s.conclusao_desejada
+         FROM suportes s
+         WHERE s.id_cliente = ?
+         ORDER BY s.os_id DESC`,
+        [id_cliente]
+    );
+    return rows;
+}
+
 module.exports = {
     addOS,
     GetOS,
     GetAllOS,
-    UpdateOS
+    UpdateOS,
+    GetOSByClient
 }

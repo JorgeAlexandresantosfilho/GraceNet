@@ -1,9 +1,11 @@
 import axios from 'axios';
 import type { Cliente, Plano, Equipamento, TicketSuporte, Usuario, PerfilAcesso, Pop, Tecnico, Log } from '../types';
 
-const apiClient = axios.create({
+export const api = axios.create({
   baseURL: 'http://localhost:3000',
 });
+
+const apiClient = api;
 
 // ===================================================================
 // FUNÇÕES DE CLIENTE (Sem alterações)

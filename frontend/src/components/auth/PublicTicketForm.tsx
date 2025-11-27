@@ -48,11 +48,12 @@ const PublicTicketForm: React.FC<PublicTicketFormProps> = ({ onNavigateToLogin }
         titulo,
         descricao_problema,
       });
-      
+
       setSuccess(response.data.msg); // "Chamado aberto com sucesso!..."
       setFormData({ cpf: '', titulo: '', descricao_problema: '' }); // Limpa o formulário
 
     } catch (err: any) {
+      console.error("Erro ao abrir chamado:", err);
       // Se a API der erro (ex: "CPF não encontrado")
       if (err.response && err.response.data && err.response.data.Msg) {
         setError(err.response.data.Msg);
@@ -67,7 +68,7 @@ const PublicTicketForm: React.FC<PublicTicketFormProps> = ({ onNavigateToLogin }
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
       <div className="w-full max-w-md">
-        
+
         <div className="flex flex-col items-center mb-6">
           <div className="p-4 bg-blue-600 rounded-full mb-3">
             <Wifi className="w-8 h-8 text-white" />
@@ -78,9 +79,9 @@ const PublicTicketForm: React.FC<PublicTicketFormProps> = ({ onNavigateToLogin }
 
         <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-200">
           <h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">Abrir Chamado de Suporte</h2>
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
-            
+
             <div>
               <label htmlFor="cpf" className="block text-sm font-medium text-gray-700">Seu CPF</label>
               <div className="relative mt-1">
@@ -95,7 +96,7 @@ const PublicTicketForm: React.FC<PublicTicketFormProps> = ({ onNavigateToLogin }
                   value={formData.cpf}
                   onChange={handleChange}
                   placeholder="000.000.000-00"
-                  className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900"
                 />
               </div>
             </div>
@@ -110,10 +111,10 @@ const PublicTicketForm: React.FC<PublicTicketFormProps> = ({ onNavigateToLogin }
                 value={formData.titulo}
                 onChange={handleChange}
                 placeholder="Ex: Internet lenta"
-                className="mt-1 px-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="mt-1 px-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900"
               />
             </div>
-            
+
             <div>
               <label htmlFor="descricao_problema" className="block text-sm font-medium text-gray-700">Descreva o Problema</label>
               <textarea
@@ -124,21 +125,21 @@ const PublicTicketForm: React.FC<PublicTicketFormProps> = ({ onNavigateToLogin }
                 value={formData.descricao_problema}
                 onChange={handleChange}
                 placeholder="Detalhe o que está acontecendo..."
-                className="mt-1 px-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="mt-1 px-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900"
               />
             </div>
-            
+
             {/* Mensagem de Erro ou Sucesso */}
             {error && (
-                <div className="p-3 bg-red-100 text-red-700 rounded-lg text-sm">
-                    {error}
-                </div>
+              <div className="p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+                {error}
+              </div>
             )}
             {success && (
-                <div className="p-3 bg-green-100 text-green-700 rounded-lg text-sm flex items-center space-x-2">
-                    <CheckCircle className="w-5 h-5" />
-                    <span>{success}</span>
-                </div>
+              <div className="p-3 bg-green-100 text-green-700 rounded-lg text-sm flex items-center space-x-2">
+                <CheckCircle className="w-5 h-5" />
+                <span>{success}</span>
+              </div>
             )}
 
             <div>
@@ -151,10 +152,10 @@ const PublicTicketForm: React.FC<PublicTicketFormProps> = ({ onNavigateToLogin }
                 disabled:bg-blue-400 disabled:cursor-not-allowed"
               >
                 {loading ? 'Enviando...' : (
-                    <>
-                        <Send className="w-5 h-5 mr-2" />
-                        Enviar Chamado
-                    </>
+                  <>
+                    <Send className="w-5 h-5 mr-2" />
+                    Enviar Chamado
+                  </>
                 )}
               </button>
             </div>

@@ -9,6 +9,12 @@ const ClientLogin: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
+    React.useEffect(() => {
+        // Clear session when visiting login page
+        sessionStorage.removeItem('authToken');
+        sessionStorage.removeItem('currentUser');
+    }, []);
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
@@ -26,8 +32,9 @@ const ClientLogin: React.FC = () => {
             const data = await response.json();
 
             if (response.ok) {
-                localStorage.setItem('clientToken', data.token);
-                localStorage.setItem('clientUser', JSON.stringify(data.user));
+                // Use sessionStorage and standard keys to match api.ts and other components
+                sessionStorage.setItem('authToken', data.token);
+                sessionStorage.setItem('currentUser', JSON.stringify(data.user));
                 navigate('/area-cliente/dashboard');
             } else {
                 setError(data.message || 'Erro ao realizar login.');

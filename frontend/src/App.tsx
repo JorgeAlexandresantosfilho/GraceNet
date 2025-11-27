@@ -27,6 +27,8 @@ import ClientDashboard from "./pages/ClientDashboard";
 import LandingPage from "./pages/LandingPage";
 import ClientActivation from "./pages/ClientActivation";
 import ClientSignUp from "./pages/ClientSignUp";
+import SpeedTest from "./pages/SpeedTest";
+import ClientInvoices from "./pages/ClientInvoices";
 
 import { ThemeProvider } from "./contexts/ThemeContext";
 
@@ -48,10 +50,13 @@ function App() {
           {/* Client Area Routes */}
           <Route path="/area-cliente/login" element={<ClientLogin />} />
           <Route path="/area-cliente/ativar" element={<ClientActivation />} />
+          // ...
+
           <Route path="/area-cliente" element={<ClientLayout />}>
             <Route path="dashboard" element={<ClientDashboard />} />
-            <Route path="faturas" element={<ClientDashboard />} />
+            <Route path="faturas" element={<ClientInvoices />} />
             <Route path="suporte" element={<ClientDashboard />} />
+            <Route path="speedtest" element={<SpeedTest />} />
           </Route>
 
           {/* Admin/Employee Routes */}

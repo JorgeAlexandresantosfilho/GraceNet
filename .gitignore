@@ -7,3 +7,7 @@
 scripts/fix_permissions.js
 middleware/authMiddleware.js
 scripts/check_users.js
+deploy.sh
+deployment_guide.md
+gracenet_production.sql
+

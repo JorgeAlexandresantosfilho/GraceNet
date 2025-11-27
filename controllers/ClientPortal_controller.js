@@ -51,6 +51,9 @@ exports.Login = async (req, res) => {
     }
 };
 
+const os_models = require('../models/os_models');
+const faturas_models = require('../models/faturas_models');
+
 exports.GetDashboardData = async (req, res) => {
     try {
         const clientId = req.user.id;
@@ -60,13 +63,13 @@ exports.GetDashboardData = async (req, res) => {
             return res.status(404).json({ message: 'Cliente não encontrado.' });
         }
 
+        // Fetch real invoices from database
+        const invoices = await faturas_models.GetFaturasByClient(clientId);
 
-        const invoices = [
-            { id: 1, vencimento: '2023-11-10', valor: 99.90, status: 'Pago' },
-            { id: 2, vencimento: '2023-12-10', valor: 99.90, status: 'Pendente' }
-        ];
+        // Take only the last 5 for the dashboard
+        const recentInvoices = invoices.slice(0, 5);
 
-
+        const tickets = await os_models.GetOSByClient(clientId);
 
         res.status(200).json({
             client: {
@@ -75,13 +78,24 @@ exports.GetDashboardData = async (req, res) => {
                 status: client.status,
                 vencimento: client.vencimento
             },
-            invoices,
+            invoices: recentInvoices,
             tickets
         });
 
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Erro ao buscar dados do dashboard.' });
+    }
+};
+
+exports.GetClientInvoices = async (req, res) => {
+    try {
+        const clientId = req.user.id;
+        const invoices = await faturas_models.GetFaturasByClient(clientId);
+        res.status(200).json(invoices);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Erro ao buscar faturas.' });
     }
 };
 
@@ -99,7 +113,7 @@ exports.ActivateAccount = async (req, res) => {
             return res.status(404).json({ message: 'Cliente não encontrado.' });
         }
 
-       
+
         const dbDate = new Date(client.data_nascimento).toISOString().split('T')[0];
         const inputDate = new Date(data_nascimento).toISOString().split('T')[0];
 
@@ -122,7 +136,7 @@ exports.RegisterNewClient = async (req, res) => {
     try {
         const { nome_completo, cpf, data_nascimento, rg, telefone, email, cep, rua, numero, plano, password } = req.body;
 
-      
+
         if (!nome_completo || !cpf || !password || !plano) {
             return res.status(400).json({ message: 'Campos obrigatórios faltando.' });
         }
@@ -134,12 +148,12 @@ exports.RegisterNewClient = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-       
-        const status = 1; 
+
+        const status = 1;
         const nome_rede = 'A Configurar';
         const senha_rede = 'mudar123';
         const vencimento = '10';
-        const id_plano = null; 
+        const id_plano = null;
         const latitude = null;
         const longitude = null;
 
@@ -149,7 +163,7 @@ exports.RegisterNewClient = async (req, res) => {
             vencimento, status, id_plano, latitude, longitude
         );
 
-      
+
         const newClient = await Clients_models.CheckClientLogin(cpf);
         await Clients_models.UpdateClientPassword(newClient.id_cliente, hashedPassword);
 

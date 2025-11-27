@@ -5,7 +5,6 @@ const jwt = require('jsonwebtoken');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'BRUCE_WAYNE';
 
-
 const verifyToken = (req, res, next) => {
     const token = req.headers['authorization'];
     if (!token) return res.status(403).json({ message: 'Nenhum token fornecido.' });
@@ -21,5 +20,6 @@ router.post('/login', ClientPortal_controller.Login);
 router.post('/activate', ClientPortal_controller.ActivateAccount);
 router.post('/register', ClientPortal_controller.RegisterNewClient);
 router.get('/dashboard', verifyToken, ClientPortal_controller.GetDashboardData);
+router.get('/invoices', verifyToken, ClientPortal_controller.GetClientInvoices);
 
 module.exports = router;
