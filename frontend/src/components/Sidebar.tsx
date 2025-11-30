@@ -1,5 +1,6 @@
 import React from "react";
-import { BarChart3, Headphones, Home, Menu, Users, Wifi, Router, FileText, Map, UserCog } from "lucide-react";
+import { BarChart3, Headphones, Home, Menu, Users, Wifi, Router, FileText, UserCog } from "lucide-react";
+import { isUserLoggedIn } from "../services/api";
 
 interface SidebarProps {
   abaAtiva: string;
@@ -14,6 +15,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   recolhida,
   definirRecolhida,
 }) => {
+  const { user } = isUserLoggedIn();
+  const isAdmin = user?.perfil_id === 1;
+
   const itensMenu = [
     { id: "dashboard", rotulo: "Dashboard", icone: BarChart3 },
     { id: "clientes", rotulo: "Clientes", icone: Users },
@@ -23,9 +27,13 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: "relatorios", rotulo: "Relatórios", icone: FileText },
     { id: "usuarios", rotulo: "Usuários", icone: Users },
     { id: "tecnicos", rotulo: "Funcionários", icone: UserCog },
-    { id: "mapa", rotulo: "Mapa", icone: Map },
     { id: "logs", rotulo: "Logs", icone: FileText },
-  ];
+  ].filter(item => {
+    if (isAdmin) return true;
+    // Technician (2) restrictions
+    const restrictedForTech = ["usuarios", "planos", "relatorios", "tecnicos", "logs"];
+    return !restrictedForTech.includes(item.id);
+  });
 
   return (
     <div

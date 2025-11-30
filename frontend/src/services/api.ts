@@ -7,6 +7,16 @@ export const api = axios.create({
 
 const apiClient = api;
 
+apiClient.interceptors.request.use((config) => {
+  const token = sessionStorage.getItem('authToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
 // ===================================================================
 // FUNÇÕES DE CLIENTE (Sem alterações)
 // ===================================================================

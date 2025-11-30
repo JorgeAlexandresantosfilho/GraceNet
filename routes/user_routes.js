@@ -1,18 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const user_controller = require('../controllers/user_controller');
+const { verifyToken, checkRole, checkSameUserOrRole } = require('../middleware/authMiddleware');
 
-router.post('/register', user_controller.RegisterUser);
+// Public route (Login & Register)
 router.post('/login', user_controller.LoginUser);
+router.post('/register', user_controller.RegisterUser);
+router.post('/change-password', verifyToken, user_controller.ChangePassword); // Any authenticated user
 
-router.post('/change-password', user_controller.ChangePassword);
+router.get('/users', verifyToken, checkRole([1]), user_controller.GetAllUsers); // Admin only
+router.get('/admin/users', verifyToken, checkRole([1]), user_controller.GetAllUsersForAdmin); // Admin only
+router.get('/users/:id', verifyToken, checkSameUserOrRole([1]), user_controller.GetUserById); // Admin or Self
 
-router.get('/users', user_controller.GetAllUsers);
-router.get('/admin/users', user_controller.GetAllUsersForAdmin);
-router.get('/users/:id', user_controller.GetUserById);
+router.put('/users/:id', verifyToken, checkSameUserOrRole([1]), user_controller.UpdateUser); // Admin or Self
 
-router.put('/users/:id', user_controller.UpdateUser);
-
-router.delete('/users/:id', user_controller.DeleteUser);
+router.delete('/users/:id', verifyToken, checkRole([1]), user_controller.DeleteUser); // Admin only
 
 module.exports = router;

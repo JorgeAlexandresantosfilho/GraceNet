@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { User, Lock, Calendar, Phone, Mail, MapPin, ArrowRight, CheckCircle2, Wifi, CreditCard } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Wifi } from 'lucide-react';
 
 const ClientSignUp: React.FC = () => {
     const navigate = useNavigate();
@@ -169,27 +169,27 @@ const ClientSignUp: React.FC = () => {
                                         <div className="grid md:grid-cols-2 gap-6">
                                             <div className="md:col-span-2">
                                                 <label className="block text-sm font-medium text-slate-700 mb-1">Nome Completo</label>
-                                                <input type="text" name="nome_completo" value={formData.nome_completo} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all" required />
+                                                <input type="text" name="nome_completo" value={formData.nome_completo} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-slate-900" required />
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-medium text-slate-700 mb-1">CPF</label>
-                                                <input type="text" name="cpf" value={formData.cpf} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all" placeholder="000.000.000-00" required />
+                                                <input type="text" name="cpf" value={formData.cpf} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-slate-900" placeholder="000.000.000-00" required />
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-medium text-slate-700 mb-1">RG</label>
-                                                <input type="text" name="rg" value={formData.rg} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all" required />
+                                                <input type="text" name="rg" value={formData.rg} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-slate-900" required />
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-medium text-slate-700 mb-1">Data de Nascimento</label>
-                                                <input type="date" name="data_nascimento" value={formData.data_nascimento} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all" required />
+                                                <input type="date" name="data_nascimento" value={formData.data_nascimento} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-slate-900" required />
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-medium text-slate-700 mb-1">Telefone</label>
-                                                <input type="text" name="telefone" value={formData.telefone} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all" required />
+                                                <input type="text" name="telefone" value={formData.telefone} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-slate-900" required />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                                                <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all" required />
+                                                <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-slate-900" required />
                                             </div>
                                         </div>
                                     </div>
@@ -199,15 +199,15 @@ const ClientSignUp: React.FC = () => {
                                         <div className="grid md:grid-cols-4 gap-6">
                                             <div className="md:col-span-1">
                                                 <label className="block text-sm font-medium text-slate-700 mb-1">CEP</label>
-                                                <input type="text" name="cep" value={formData.cep} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all" required />
+                                                <input type="text" name="cep" value={formData.cep} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-slate-900" required />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <label className="block text-sm font-medium text-slate-700 mb-1">Rua</label>
-                                                <input type="text" name="rua" value={formData.rua} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all" required />
+                                                <input type="text" name="rua" value={formData.rua} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-slate-900" required />
                                             </div>
                                             <div className="md:col-span-1">
                                                 <label className="block text-sm font-medium text-slate-700 mb-1">Número</label>
-                                                <input type="text" name="numero" value={formData.numero} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all" required />
+                                                <input type="text" name="numero" value={formData.numero} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-slate-900" required />
                                             </div>
                                         </div>
                                     </div>
@@ -217,11 +217,11 @@ const ClientSignUp: React.FC = () => {
                                         <div className="grid md:grid-cols-2 gap-6">
                                             <div>
                                                 <label className="block text-sm font-medium text-slate-700 mb-1">Senha de Acesso</label>
-                                                <input type="password" name="password" value={formData.password} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all" required />
+                                                <input type="password" name="password" value={formData.password} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-slate-900" required />
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-medium text-slate-700 mb-1">Confirmar Senha</label>
-                                                <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all" required />
+                                                <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-slate-900" required />
                                             </div>
                                         </div>
                                     </div>

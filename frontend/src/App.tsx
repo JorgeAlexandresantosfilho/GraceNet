@@ -16,7 +16,6 @@ import Support from "./components/Support";
 import Reports from "./components/Reports";
 import UserManagement from "./components/UserManagement";
 import MeuPerfil from "./components/MeuPerfil";
-import MapComponent from "./components/MapComponent";
 import TechnicianManagement from "./components/TechnicianManagement";
 import SystemLogs from "./components/SystemLogs";
 
@@ -34,7 +33,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 
 type Pagina =
   "dashboard" | "clientes" | "planos" | "equipamentos" |
-  "suporte" | "relatorios" | "usuarios" | "meuperfil" | "mapa" | "tecnicos" | "logs";
+  "suporte" | "relatorios" | "usuarios" | "meuperfil" | "tecnicos" | "logs";
 
 function App() {
   return (
@@ -147,7 +146,6 @@ function AdminLayout() {
       case "relatorios": return <Reports />;
       case "usuarios": return <UserManagement />;
       case "meuperfil": return <MeuPerfil />;
-      case "mapa": return <MapComponent />;
       case "tecnicos": return <TechnicianManagement />;
       case "logs": return <SystemLogs />;
       default: return <Dashboard />;

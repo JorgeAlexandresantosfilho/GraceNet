@@ -1,13 +1,11 @@
-<<<<<<< HEAD
 .env
-=======
-.env
->>>>>>> eb502bf00be535d061ae0d80bd7706d57f4f4bb4
 /node_modules
-scripts/fix_permissions.js
-middleware/authMiddleware.js
-scripts/check_users.js
 deploy.sh
 deployment_guide.md
-gracenet_production.sql
-
+gracenet_staging
+./scripts
+debug_rbac.txt
+gracenet_development
+gracenet_staging
+gracenet_production
+./middleware
