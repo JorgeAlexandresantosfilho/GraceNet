@@ -68,10 +68,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateToRegister, onNavigate
             </div>
 
             <div>
-              <div className="flex items-center justify-between">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha</label>
-                <a href="#" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">Esqueceu sua senha?</a>
-              </div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha</label>
               <div className="relative mt-1">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="w-5 h-5 text-gray-400" />
@@ -110,7 +107,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateToRegister, onNavigate
           {/* Links de Navegação */}
           <div className="text-center mt-6 space-y-2">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Não tem uma conta de admin?{' '}
+              Não tem uma conta de usuário?{' '}
               <button type="button" onClick={onNavigateToRegister}
                 className="font-medium text-blue-600 dark:text-blue-400 hover:underline">
                 Cadastre-se

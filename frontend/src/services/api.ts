@@ -563,18 +563,19 @@ export const getPerfisAcesso = async (): Promise<PerfilAcesso[]> => {
 // FUNÇÃO DO DASHBOARD
 // ===================================================================
 interface DashboardStats {
-  clientes: Cliente[];
-  planos: Plano[];
-  tickets: TicketSuporte[];
+  novosClientes: number;
+  clientesAtivos: number;
+  chamadosAbertos: number;
+  planoMaisVendido: string;
+  distribuicaoPlanos: { name: string; value: number }[];
+  clientesRecentes: Cliente[];
+  crescimentoBase: { mes: string; clientes: number }[];
 }
+
 export const getDashboardStats = async (): Promise<DashboardStats> => {
   try {
-    const [clientes, planos, tickets] = await Promise.all([
-      getClientes(),
-      getPlanos(),
-      getSuporteTickets()
-    ]);
-    return { clientes, planos, tickets };
+    const response = await apiClient.get('/Dashboard');
+    return response.data;
   } catch (error) {
     console.error("Erro ao buscar dados do dashboard:", error);
     throw new Error("Não foi possível carregar os dados do dashboard.");

@@ -44,4 +44,7 @@ app.use('/ClientPortal', client_portal_routes);
 const logs_routes = require('./routes/logs_routes');
 app.use('/Logs', logs_routes);
 
+const dashboard_routes = require('./routes/dashboard_routes');
+app.use('/Dashboard', dashboard_routes);
+
 module.exports = app;

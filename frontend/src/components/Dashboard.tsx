@@ -59,23 +59,14 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [estatisticas, setEstatisticas] = useState({
-    novosClientes: 90,
+    novosClientes: 0,
     clientesAtivos: 0,
     planoMaisVendido: "...",
     chamadosAbertos: 0,
   });
   const [clientesRecentes, setClientesRecentes] = useState<Cliente[]>([]);
   const [dadosPlanos, setDadosPlanos] = useState<{ name: string; value: number }[]>([]);
-
-  // Dados Mock para o gráfico de área
-  const dadosMensais = [
-    { mes: "Mar", clientes: 1765 },
-    { mes: "Abr", clientes: 1790 },
-    { mes: "Mai", clientes: 1815 },
-    { mes: "Jun", clientes: 1840 },
-    { mes: "Jul", clientes: 1860 },
-    { mes: "Ago", clientes: 1950 },
-  ];
+  const [dadosMensais, setDadosMensais] = useState<{ mes: string; clientes: number }[]>([]);
 
   // Cores para o gráfico de Pizza
   const COLORS = ['#3B82F6', '#8B5CF6', '#10B981', '#F59E0B'];
@@ -88,37 +79,16 @@ const Dashboard = () => {
 
         const data = await getDashboardStats();
 
-        const clientesAtivos = data.clientes.filter(c => c.status === "Ativo").length;
-        const chamadosAbertos = data.tickets.filter(t => t.status === "Aberto").length;
-
-        let planoMaisVendido = "N/A";
-        let chartData: { name: string; value: number }[] = [];
-
-        if (data.clientes.length > 0) {
-          const contagemPlanos = data.clientes.reduce((acc, cliente) => {
-            if (cliente.plano) {
-              acc[cliente.plano] = (acc[cliente.plano] || 0) + 1;
-            }
-            return acc;
-          }, {} as Record<string, number>);
-
-          // Prepara dados para o gráfico de pizza
-          chartData = Object.entries(contagemPlanos).map(([name, value]) => ({ name, value }));
-
-          const [plano] = Object.entries(contagemPlanos)
-            .sort((a, b) => b[1] - a[1])[0] || ["N/A"];
-          planoMaisVendido = plano;
-        }
-
         setEstatisticas({
-          novosClientes: 90,
-          clientesAtivos: clientesAtivos,
-          planoMaisVendido: planoMaisVendido,
-          chamadosAbertos: chamadosAbertos,
+          novosClientes: data.novosClientes,
+          clientesAtivos: data.clientesAtivos,
+          planoMaisVendido: data.planoMaisVendido,
+          chamadosAbertos: data.chamadosAbertos,
         });
 
-        setClientesRecentes(data.clientes.slice(0, 5));
-        setDadosPlanos(chartData);
+        setClientesRecentes(data.clientesRecentes);
+        setDadosPlanos(data.distribuicaoPlanos);
+        setDadosMensais(data.crescimentoBase);
 
       } catch (err: any) {
         setError(err.message || "Falha ao carregar dados do dashboard.");
@@ -313,8 +283,8 @@ const Dashboard = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${cliente.status === "Ativo"
-                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                          : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                        : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
                         }`}>
                         {cliente.status}
                       </span>
